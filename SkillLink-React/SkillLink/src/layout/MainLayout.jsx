@@ -1,0 +1,74 @@
+import { Outlet } from 'react-router-dom';
+import Navbar from '../layout/Navbar';
+import Footer from '../layout/Footer';
+import bgImage from "../assets/Images/download.jpg";
+import { startConnection, stopConnection } from '../signalR';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import { useEffect } from 'react';
+
+const MySwal = withReactContent(Swal);
+
+export const showNotification = (message) => {
+    MySwal.fire({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        background: 'lightCyan',
+        customClass: {
+            popup: 'custom-toast'
+        },
+        html: `
+            <div style="display: flex; align-items: center; ">
+                <img src="${message.userImg}" 
+                     alt="${message.fullName}" 
+                     style="width: 60px; height: 60px; border-radius: 50%; margin-right: 10px;" />
+                <div style="text-align: left;">
+                    <div style="font-weight: 600;">${message.fullName}</div>
+                    <div style="font-size: 14px; color:black">${message.message}</div>
+                </div>
+            </div>
+        `
+    });
+};
+function MainLayout() {
+
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        startConnection(token, (message) => {
+            showNotification({
+                fullName: message.fullName,
+                message: message.message,
+                userImg: message.userImg
+            });
+
+        });
+
+        return () => {
+            stopConnection();
+        };
+    }, [])
+
+    return (
+        <div className="min-h-screen flex flex-col relative">
+            <Navbar />
+            <main
+                className="flex-grow px-6 bg-gray-50"
+                style={{
+                    backgroundImage: `url(${bgImage})`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    backgroundSize: 'cover'
+                }}
+            >
+                <Outlet />
+            </main>
+            <Footer />
+        </div>
+    );
+}
+
+export default MainLayout;
