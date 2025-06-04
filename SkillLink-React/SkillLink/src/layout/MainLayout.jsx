@@ -1,7 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from '../layout/Navbar';
 import Footer from '../layout/Footer';
-import bgImage from "../assets/Images/download.jpg";
 import { startConnection, stopConnection } from '../signalR';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -10,13 +9,15 @@ import { useEffect } from 'react';
 const MySwal = withReactContent(Swal);
 
 export const showNotification = (message) => {
+    console.log(message);
+
     MySwal.fire({
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
         timer: 4000,
         timerProgressBar: true,
-        background: 'lightCyan',
+        background: 'lightGreen',
         customClass: {
             popup: 'custom-toast'
         },
@@ -26,7 +27,7 @@ export const showNotification = (message) => {
                      alt="${message.fullName}" 
                      style="width: 60px; height: 60px; border-radius: 50%; margin-right: 10px;" />
                 <div style="text-align: left;">
-                    <div style="font-weight: 600;">${message.fullName}</div>
+                    <div style="font-weight: 600; color:black">${message.fullName}</div>
                     <div style="font-size: 14px; color:black">${message.message}</div>
                 </div>
             </div>
@@ -57,12 +58,6 @@ function MainLayout() {
             <Navbar />
             <main
                 className="flex-grow px-6 bg-gray-50"
-                style={{
-                    backgroundImage: `url(${bgImage})`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                    backgroundSize: 'cover'
-                }}
             >
                 <Outlet />
             </main>

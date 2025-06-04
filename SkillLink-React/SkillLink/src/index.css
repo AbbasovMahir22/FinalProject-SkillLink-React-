@@ -16,6 +16,12 @@
     animation: highlight-fade 2s ease;
 }
 
+html,
+body {
+    height: auto;
+    overflow-y: scroll;
+}
+
 @keyframes highlight-fade {
     0% {
         background-color: lightblue;
@@ -28,4 +34,20 @@
     100% {
         background-color: transparent;
     }
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.2s ease-out forwards;
 }

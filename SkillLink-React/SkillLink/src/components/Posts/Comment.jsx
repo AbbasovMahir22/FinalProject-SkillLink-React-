@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AiFillLike } from "react-icons/ai";
 import { MdDelete } from "react-icons/md";
+import { MdEdit } from "react-icons/md";
 import axios from "axios";
-const Comment = ({ comment, commentDelete }) => {
+const Comment = ({ comment, commentDelete,handleEdit }) => {
     const commentRef = useRef(null);
     const [likes, setLikes] = useState(comment.likeCount);
     const [liked, setLiked] = useState(comment.isLiked);
@@ -37,7 +38,7 @@ const Comment = ({ comment, commentDelete }) => {
     }, [comment.id]);
 
     const handleDelete = async (commentId) => {
-        const token=localStorage.getItem("token");
+        const token = localStorage.getItem("token");
         await axios.delete(`https://localhost:7067/api/Comment/Delete/${commentId}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
@@ -67,10 +68,10 @@ const Comment = ({ comment, commentDelete }) => {
         <div
             id={`comment-${comment.id}`}
             ref={commentRef}
-            className=" hover:bg-amber-200 transition duration-300 p-2 border-b flex gap-3"
+            className=" hover:bg-amber-200   transition duration-300 p-2 border-b flex gap-3"
         >
             <img src={comment.userImg} alt="avatar" className="w-8 h-8 rounded-full" />
-            <div className="flex-1">
+            <div className="flex-1 ">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <Link to={`/userDetail/${comment.userId}`}>
                         <div className="font-semibold text-sm cursor-pointer hover:text-red-500">
@@ -89,9 +90,17 @@ const Comment = ({ comment, commentDelete }) => {
                         <AiFillLike size={18} className={`  hover:text-red-600 cursor-pointer ${liked ? "text-red-500" : "text-gray-800"}`} />
                         <span>{likes}</span>
                     </button>
-                    <button onClick={() => handleDelete(comment.id)} className={`${comment.isMine ? "flex text-gray-400" : "hidden"}`}>
-                        <MdDelete size={18} className="text-gray-600 cursor-pointer hover:text-red-500" />
-                    </button>
+                    {comment.isMine &&(
+                    <div className="flex gap-0.5">
+                        <button onClick={() => handleEdit(comment.id, comment.commentText)}  className="flex text-gray-400">
+                            <MdEdit size={18} className="text-gray-600 cursor-pointer hover:text-red-500" />
+                        </button>
+                        <button onClick={() => handleDelete(comment.id)} className="flex text-gray-400 ">
+                            <MdDelete size={18} className="text-gray-600 cursor-pointer hover:text-red-500" />
+                        </button>
+                    </div>
+                    )}
+
                 </div>
             </div>
         </div>

@@ -2,12 +2,12 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import bgImage from "../assets/Images/LoginBackGround.jpg";
 import Swal from 'sweetalert2';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import SpecializationModal from '../components/Auth/SpecializationModal';
 function Authentication() {
+    const [showModal, setShowModal] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [message, setMessage] = useState("");
@@ -57,7 +57,12 @@ function Authentication() {
 
                 if (res.data.success) {
                     localStorage.setItem('token', res.data.token);
-                    navigate('/');
+                    if (!res.data.hasSpecialization) {
+                        setShowModal(true);
+                    }
+                    else {
+                        navigate('/');
+                    }
                 } else {
                     setMessage(res.data.errorMessage);
                 }
@@ -85,9 +90,15 @@ function Authentication() {
 
     return (
         <div
-            className="min-h-screen flex items-center justify-center"
-            style={{ backgroundImage: `url(${bgImage})`, backgroundRepeat: 'no-repeat', backgroundPosition: 'center', backgroundSize: 'cover' }}
-        >
+            className="min-h-screen flex items-center justify-center" >
+            <SpecializationModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onSaved={() => {
+                    setShowModal(false);
+                    navigate('/');
+                }}
+            />
             <div className="opacity-90 bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
                 <h1 className='text-center text-4xl font-bold mb-2.5'>
                     <span className="text-sky-500">Skill</span>

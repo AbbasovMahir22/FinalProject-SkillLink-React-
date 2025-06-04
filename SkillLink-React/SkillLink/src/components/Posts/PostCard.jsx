@@ -1,7 +1,13 @@
-import React from 'react';
+import { useState } from 'react';
 import { AiFillLike } from "react-icons/ai";
 import { FaCommentDots, FaPlay } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
+import LikerModal from './LikerModel';
+import EditPostModal from '../User/EditPostModal';
+import axios from 'axios';
+import { Loader } from 'lucide-react';
+import { MdDelete } from "react-icons/md";
+import { GrEdit } from "react-icons/gr";
 
 const truncateWords = (text, maxWords) => {
     if (!text) return "";
@@ -9,25 +15,94 @@ const truncateWords = (text, maxWords) => {
     if (words.length <= maxWords) return text;
     return words.slice(0, maxWords).join(" ") + "...";
 };
+function formatDescription(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
 
-const PostCard = ({ post }) => {
+    return text?.split(urlRegex).map((part, index) => {
+        if (part.match(urlRegex)) {
+            const url = new URL(part);
+            const displayText = url.hostname.includes("chatgpt.com") ? "ChatGPT.com" : url.hostname.replace("www.", "");
+
+            return (
+                <a
+                    key={index}
+                    href={part}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                >
+                    {displayText}
+                </a>
+            );
+        }
+        return <span key={index}>{part}</span>;
+    });
+}
+const PostCard = ({ post, isMyProfile = false }) => {
     const navigate = useNavigate();
+    const [isLikeModalOpen, setIsLikeModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [currentPost, setCurrentPost] = useState(post);
+    const [loading, setLoading] = useState(false);
 
-    const goToDetail = () => {
-        navigate(`/PostDetail/${post.id}`);
+    const openEditModal = (e) => {
+        e.stopPropagation();
+        setIsEditModalOpen(true);
     };
+    const handleSave = async (updatedPost) => {
+        setLoading(true);
+        setIsEditModalOpen(false);
+
+        const token = localStorage.getItem("token");
+
+        const response = await axios.put(`https://localhost:7067/api/Post/Update/${post.id}`, updatedPost, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        setCurrentPost(response.data);
+        setLoading(false);
+    };
+
+    const goToDetail = () => navigate(`/PostDetail/${currentPost.id}`);
 
     return (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden transition duration-300 cursor-pointer hover:shadow-2xl hover:scale-[1.02] select-none relative max-w-sm w-full flex flex-col h-auto">
+            {loading && <Loader />}
+            {isMyProfile && (
+                <div>
+                    <button
+                        onClick={openEditModal}
+                        className="absolute top-3 right-3 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 text-xs rounded shadow-md z-10"
+                    >
+                        <GrEdit size={20} />
+                    </button>
+                    <button
+                        onClick={async (e) => {
+                            e.stopPropagation();
+                            const token = localStorage.getItem("token");
+                            await axios.delete(`https://localhost:7067/api/Post/Delete/${post.id}`, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            });
+                            window.location.reload();
+                        }}
+                        className="absolute top-12 right-3 cursor-pointer bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-xs rounded shadow-md z-10"
+                    >
+                        <MdDelete size={20} />
+                    </button>
+                </div>
+            )}
 
-            {post.isVideo ? (
+            {currentPost.isVideo ? (
                 <div
                     className="relative w-full h-48 sm:h-56 rounded-t-lg overflow-hidden"
                     onClick={goToDetail}
                 >
                     <video
                         className="w-full h-full object-cover"
-                        src={post.mediaUrl}
+                        src={currentPost.mediaUrl}
                         muted
                         preload="metadata"
                     />
@@ -36,65 +111,78 @@ const PostCard = ({ post }) => {
                             e.stopPropagation();
                             goToDetail();
                         }}
-                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-4 flex items-center justify-center cursor-pointer"
+                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-4"
                         aria-label="Play Video"
                     >
                         <FaPlay className="text-3xl" />
                     </button>
                     <div className='absolute top-3 left-3 bg-amber-300 bg-opacity-90 px-2 py-0.5 rounded-md text-xs font-semibold text-gray-800 shadow-md'>
-                        {post.category}{post.subCategory ? ` / ${post.subCategory}` : ""}
+                        {currentPost.category}{currentPost.subCategory ? ` / ${currentPost.subCategory}` : ""}
                     </div>
                 </div>
             ) : (
-                <Link to={`/PostDetail/${post.id}`} className="block relative group">
+                <Link to={`/PostDetail/${currentPost.id}`} className="block relative group">
                     <img
-                        src={post.mediaUrl}
-                        alt={post.title || "Post media"}
+                        src={currentPost.mediaUrl}
+                        alt={currentPost.title || "Post media"}
                         className="w-full h-48 sm:h-56 object-cover rounded-t-lg transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className='absolute top-3 left-3 bg-amber-300 bg-opacity-90 px-2 py-0.5 rounded-md text-xs font-semibold text-gray-800 shadow-md'>
-                        {post.category}{post.subCategory ? ` / ${post.subCategory}` : ""}
+                        {currentPost.category}{currentPost.subCategory ? ` / ${currentPost.subCategory}` : ""}
                     </div>
                 </Link>
             )}
 
-            {/* Content */}
             <div className="p-4 flex flex-col flex-1 justify-between">
                 <div>
                     <div className="flex items-center gap-3 mb-3">
-                        <Link to={`/UserDetail/${post.appUserId}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <Link to={`/UserDetail/${currentPost.appUserId}`} className="flex items-center gap-2 hover:opacity-80">
                             <img
-                                src={post.userImage}
-                                alt={post.userName || "User avatar"}
+                                src={currentPost.userImage}
+                                alt={currentPost.userName || "User avatar"}
                                 className='w-9 h-9 rounded-full object-cover border shadow-sm'
                             />
-                            <h1 className="text-sm font-semibold text-gray-900 hover:text-red-500 whitespace-nowrap">{post.userName}</h1>
+                            <h1 className="text-sm font-semibold text-gray-900 hover:text-red-500">{currentPost.userName}</h1>
                         </Link>
                     </div>
 
-                    <h2 className="text-base font-medium text-gray-900 mb-2 line-clamp-2">{post.title}</h2>
-
-                    <p
-                        className="text-gray-700 text-xs mb-4 max-h-[72px] overflow-hidden"
-                        title={post.desc}
-                    >
-                        {truncateWords(post.desc, 18)}
+                    <h2 className="text-base font-medium text-gray-900 mb-2 line-clamp-2">{currentPost.title}</h2>
+                    <p className="text-gray-700 text-xs mb-4 max-h-[72px] overflow-hidden break-words">
+                        {formatDescription(truncateWords(currentPost.desc, 18))}
                     </p>
                 </div>
 
                 <div className='flex items-center justify-between text-lg text-gray-700 pt-2 border-t border-gray-200'>
-                    <button className='flex items-center gap-1 text-red-600 hover:text-red-800 transition'>
-                        <AiFillLike className='cursor-pointer' />
-                        <span className='font-semibold text-sm'>{post.likeCount}</span>
+                    <button
+                        onClick={() => setIsLikeModalOpen(true)}
+                        className='flex items-center hover:shadow-2xl gap-1 text-red-600 hover:text-red-800'
+                    >
+                        <AiFillLike />
+                        <span className='font-semibold text-sm'>{currentPost.likeCount}</span>
                     </button>
                     <div className='flex items-center gap-1 text-blue-600'>
-                        <span className='font-semibold text-sm'>{post.commentCount}</span>
-                        <FaCommentDots className='cursor-pointer' />
+                        <span className='font-semibold text-sm'>{currentPost.commentCount}</span>
+                        <FaCommentDots />
                     </div>
                 </div>
             </div>
+
+            <EditPostModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                post={currentPost}
+                onSave={handleSave}
+            />
+
+            <LikerModal
+                postId={currentPost.id}
+                isOpen={isLikeModalOpen}
+                onClose={() => setIsLikeModalOpen(false)}
+            />
         </div>
+
     );
+
 };
 
 export default PostCard;

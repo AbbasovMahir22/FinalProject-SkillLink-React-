@@ -1,21 +1,10 @@
-import {
-    FaUserCircle,
-    FaCog,
-    FaHome,
-    FaBars,
-    FaTimes,
-    FaSignOutAlt,
-    FaEnvelope,
-    FaBell,
-    FaCompass,
-} from "react-icons/fa";
+import { FaUserCircle, FaCog, FaHome, FaBars, FaTimes, FaSignOutAlt, FaEnvelope, FaBell, FaCompass, } from "react-icons/fa";
 import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { stopConnection } from "../signalR";
 import Swal from "sweetalert2";
 import axios from "axios";
 import logo from "../assets/Images/SkillLink.png";
-import bg from "../assets/Images/Navbar.jpg";
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -81,14 +70,7 @@ const Navbar = () => {
 
     return (
         <nav
-            className="bg-white shadow-md sticky top-0 z-50"
-            style={{
-                backgroundImage: `url(${bg})`,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                backgroundSize: "cover",
-            }}
-        >
+            className="bg-yellow-100 shadow-md sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <Link to="/" className="text-xl font-bold text-blue-600 flex items-center">
                     <div className="w-[130px] h-[60px] ">
@@ -102,9 +84,9 @@ const Navbar = () => {
                         <FaHome className="text-blue-600 text-3xl" />
                         <span className="text-lg">Home</span>
                     </Link>
-                    <Link to="/discover" className="flex items-center gap-2 hover:text-blue-600" title="Discover">
+                    <Link to="/explore" className="flex items-center gap-2 hover:text-blue-600" title="Discover">
                         <FaCompass className="text-blue-600 text-3xl" />
-                        <span className="text-lg">Discover</span>
+                        <span className="text-lg">Explore</span>
                     </Link>
                     <Link to="/messages" className="flex items-center gap-2 hover:text-blue-600" title="Messages">
                         <FaEnvelope className="text-blue-600 text-3xl" />
@@ -119,7 +101,7 @@ const Navbar = () => {
                 <div className="hidden lg:flex items-center gap-6 relative min-w-0">
                     <div className="text-sm text-gray-500 text-right truncate max-w-[150px]">
                         <div className="text-gray-800 font-bold truncate">{user.fullName}</div>
-                        <div className="text-xs truncate">{user.email}</div>
+                        <div className="text-xs truncate">{user.specialization}</div>
                     </div>
 
                     <button onClick={toggleProfile} className="relative flex-shrink-0" title="Profile">
@@ -137,7 +119,7 @@ const Navbar = () => {
                         >
                             <Link
                                 onClick={() => setProfileOpen(false)}
-                                to={`/userdetail/${user.id}`}
+                                to="myProfile"
                                 className=" px-1 py-2 text-gray-700 hover:bg-gray-200 flex items-center gap-2"
                             >
                                 <img className="w-[40px] h-[40px] rounded-full" src={user.imageUrl} />
@@ -177,9 +159,9 @@ const Navbar = () => {
                         <FaHome className="text-blue-600 text-2xl" />
                         Home
                     </Link>
-                    <Link onClick={() => setMenuOpen(false)} to="/discover" className="flex transition-all duration-300 hover:text-2xl  items-center gap-3 text-gray-700 hover:text-blue-600 text-lg font-semibold">
+                    <Link onClick={() => setMenuOpen(false)} to="/explore" className="flex transition-all duration-300 hover:text-2xl  items-center gap-3 text-gray-700 hover:text-blue-600 text-lg font-semibold">
                         <FaCompass className="text-blue-600 text-2xl" />
-                        Discover
+                        Explore
                     </Link>
                     <Link onClick={() => setMenuOpen(false)} to="/messages" className="flex transition-all duration-300 hover:text-2xl  items-center gap-3 text-gray-700 hover:text-blue-600 text-lg font-semibold">
                         <FaEnvelope className="text-blue-600 text-2xl" />
@@ -190,13 +172,13 @@ const Navbar = () => {
                         Notifications
                     </Link>
 
-                    <Link onClick={() => setMenuOpen(false)} to={`/userdetail/${user.id}`} className="text-gray-700 transition-all duration-300 hover:text-2xl  font-semibold hover:text-blue-600 flex items-center gap-2">
+                    <Link onClick={() => setMenuOpen(false)} to={`/myprofile/${user.id}`} className="text-gray-700 transition-all duration-300 hover:text-2xl  font-semibold hover:text-blue-600 flex items-center gap-2">
                         <FaUserCircle className="text-blue-600 text-2xl" />
-                        Profilim
+                        My Profile
                     </Link>
                     <Link onClick={() => setMenuOpen(false)} to="/settings" className="text-gray-700 transition-all duration-300 hover:text-2xl  font-semibold hover:text-blue-600 flex items-center gap-2">
                         <FaCog className="text-blue-600 text-2xl" />
-                        Ayarlar
+                        Settings
                     </Link>
                     <button
                         onClick={logout}

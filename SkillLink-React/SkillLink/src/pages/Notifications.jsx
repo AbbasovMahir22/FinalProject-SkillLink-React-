@@ -58,7 +58,7 @@ const Notifications = () => {
             {filteredNotifications.map((n, index) => (
               <li
                 key={index}
-                className="flex flex-col sm:flex-row items-start gap-3 bg-gray-100 hover:bg-cyan-200 p-4 rounded-lg shadow-sm transition-all duration-300"
+                className="flex flex-col sm:flex-row items-start gap-3 bg-gray-200 hover:bg-cyan-200 p-4 rounded-lg shadow-sm transition-all duration-300"
               >
                 <img
                   src={n.userImg || "/default-avatar.png"}
@@ -69,7 +69,7 @@ const Notifications = () => {
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2">
                     <Link
                       to={`/userdetail/${n.userId}`}
-                      className="text-blue-700 font-semibold hover:underline"
+                      className="text-blue-700 font-semibold hover:text-red-700"
                     >
                       {n.userFullName}
                     </Link>

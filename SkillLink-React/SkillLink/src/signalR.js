@@ -16,7 +16,6 @@ export const startConnection = (token, onNotificationReceived) => {
     connection.on("ReceiveNotification", onNotificationReceived);
 
     connection.start()
-        .then(() => console.log("Connection created"))
         .catch(err => console.error("SignalR error:", err));
 };
 

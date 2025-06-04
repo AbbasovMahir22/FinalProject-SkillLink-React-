@@ -3,10 +3,8 @@ import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { ClipLoader } from 'react-spinners';
 import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
 
-const PostCreateForm = () => {
-    const navigate = useNavigate();
+const PostCreateForm = ({ closeModal }) => {
     const { register, handleSubmit, watch, reset } = useForm();
     const [categories, setCategories] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
@@ -14,7 +12,7 @@ const PostCreateForm = () => {
     const [error, setError] = useState();
 
     const selectedCategoryId = watch('categoryId');
-    const token=localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     useEffect(() => {
         debugger
         axios.get('https://localhost:7067/api/Category/GetAll', {
@@ -30,7 +28,7 @@ const PostCreateForm = () => {
     useEffect(() => {
         debugger
         if (selectedCategoryId) {
-            axios.get(`https://localhost:7067/api/SubCategory/GetSubCategoriesByCategoryId/${selectedCategoryId}`,{
+            axios.get(`https://localhost:7067/api/SubCategory/GetSubCategoriesByCategoryId/${selectedCategoryId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -59,16 +57,15 @@ const PostCreateForm = () => {
                 }
             });
             Swal.fire({
-                title: "Uğurlu!",
-                text: "Post uğurla yaradıldı.",
+                title: "Success!",
+                text: "Created successfully.",
                 icon: "success",
 
             });
-            navigate('/');
+            closeModal();
             reset();
         } catch (err) {
 
-            // alert("Xəta baş verdi");
             setError(err.response.data.detail);
         } finally {
             setLoading(false);
@@ -98,7 +95,7 @@ const PostCreateForm = () => {
 
                 <div>
                     <label className="block  font-medium text-gray-700">SubCategory</label>
-                    <select {...register("subCategoryId")} 
+                    <select {...register("subCategoryId")}
                         className="w-full border border-gray-300 p-2 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="">Choose</option>
@@ -138,7 +135,7 @@ const PostCreateForm = () => {
                         disabled={loading}
                         className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 disabled:opacity-50 cursor-pointer"
                     >
-                        {loading ? <ClipLoader size={20} color="#fff" /> : 'Post Yarat'}
+                        {loading ? <ClipLoader size={20} color="#fff" /> : 'Create Post'}
                     </button>
                 </div>
             </form>
