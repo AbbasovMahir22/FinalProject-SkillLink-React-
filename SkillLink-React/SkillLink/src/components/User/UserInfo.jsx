@@ -21,7 +21,7 @@ const UserInfo = ({ userInfo }) => {
     const followOrUnFollow = async () => {
 
         if (!isFollow) {
-            await axios.post(`${apiUrl}UserFollow/Create/${userInfo.id}`, {}, {
+            await axios.post(`${apiUrl}/UserFollow/Create/${userInfo.id}`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
