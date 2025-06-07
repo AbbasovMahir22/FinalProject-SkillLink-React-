@@ -5,11 +5,12 @@ import Modal from "./Modal";
 export default function SpecializationModal({ isOpen, onClose, onSaved }) {
     const [specializations, setSpecializations] = useState([]);
     const [selectedId, setSelectedId] = useState("");
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const fetchSpecializations = async () => {
             const token = localStorage.getItem("token");
-            const res = await axios.get("https://localhost:7067/api/Specialization/GetAll", {
+            const res = await axios.get(`${apiUrl}/Specialization/GetAll`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -25,7 +26,7 @@ export default function SpecializationModal({ isOpen, onClose, onSaved }) {
     const handleSave = async () => {
         const token = localStorage.getItem("token");
 
-        await axios.put(`https://localhost:7067/api/Account/UpdateUserSpecialization/${selectedId}`,{}, {
+        await axios.put(`${apiUrl}/Account/UpdateUserSpecialization/${selectedId}`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -35,16 +36,16 @@ export default function SpecializationModal({ isOpen, onClose, onSaved }) {
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
-            <h2 className="text-lg font-semibold mb-4">Select Your Specialization</h2>
+        <Modal isOpen={isOpen} onClose={onClose} >
+            <h2 className="text-lg text-black font-semibold mb-4">Select Your Specialization</h2>
             <select
-                className="w-full border p-2 mb-4 cursor-pointer"
+                className="w-full border text-black p-2 mb-4 cursor-pointer"
                 value={selectedId}
                 onChange={(e) => setSelectedId(e.target.value)}
             >
                 <option value="">-- Select --</option>
                 {specializations.map(s => (
-                    <option  key={s.id} value={s.id}>{s.name}</option>
+                    <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
             </select>
             <button

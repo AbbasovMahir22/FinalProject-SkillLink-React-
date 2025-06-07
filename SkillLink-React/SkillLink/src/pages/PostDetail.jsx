@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Comment from "../components/Posts/Comment";
 import { Link, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -8,9 +8,13 @@ import Loader from '../components/Loader';
 import Swal from 'sweetalert2';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { getUserIdFromToken } from '../components/User/GetUserIdFromToken';
+import { FaUserCircle } from "react-icons/fa";
+
+
 
 
 const PostDetail = () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
     const { id } = useParams();
     const location = useLocation();
     const [data, setData] = useState({});
@@ -21,15 +25,25 @@ const PostDetail = () => {
     const [isUpdate, setIsUpdate] = useState(false);
     const [commentId, setCommentId] = useState();
     const [likeCount, setLikeCount] = useState();
+    const commentScroll = useRef();
 
     useEffect(() => {
-
+        const container = commentScroll.current;
+        const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 300;
+        if (isAtBottom) {
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [comments]);
+    useEffect(() => {
         getPost();
     }, [id]);
     useEffect(() => {
         const token = localStorage.getItem("token");
         const newConnection = new HubConnectionBuilder()
-            .withUrl("https://localhost:7067/commenthub", {
+            .withUrl(`${apiUrl}/commenthub`, {
                 accessTokenFactory: () => token
             })
             .withAutomaticReconnect()
@@ -103,7 +117,7 @@ const PostDetail = () => {
 
         setLoading(true);
         const token = localStorage.getItem("token");
-        const res = await axios.get(`https://localhost:7067/api/Post/GetPostFullData/${id}`, {
+        const res = await axios.get(`apiUrl/Post/GetPostFullData/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         setData(res.data);
@@ -147,7 +161,7 @@ const PostDetail = () => {
             text: newText
         };
 
-        await axios.post("https://localhost:7067/api/Comment/Create", newComment, {
+        await axios.post(`${apiUrl}/Comment/Create`, newComment, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json"
@@ -173,7 +187,7 @@ const PostDetail = () => {
     }
     const editComment = async () => {
         const token = localStorage.getItem("token");
-        await axios.put(`https://localhost:7067/api/Comment/Update/${commentId}`,
+        await axios.put(`${apiUrl}/Comment/Update/${commentId}`,
             changedComment,
             {
                 headers: {
@@ -189,7 +203,7 @@ const PostDetail = () => {
     const likePost = async (id) => {
         const token = localStorage.getItem("token");
         if (isLiked) {
-            await axios.delete(`https://localhost:7067/api/Like/DeletePostLike/${id}`, {
+            await axios.delete(`${apiUrl}/Like/DeletePostLike/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -198,7 +212,7 @@ const PostDetail = () => {
             setLikeCount(prev => Math.max(0, prev - 1));
         }
         else {
-            await axios.post(`https://localhost:7067/api/Like/CreatePostLike/${id}`, {}, {
+            await axios.post(`${apiUrl}/Like/CreatePostLike/${id}`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -219,11 +233,16 @@ const PostDetail = () => {
                     <Link to="/">
                         <IoArrowBackOutline className="w-[20px] h-[20px] cursor-pointer transition duration-300 hover:scale-110 hover:text-red-700" />
                     </Link>
-                    <img
-                        src={data.userImg}
-                        alt="avatar"
-                        className="w-12 h-12 rounded-full border object-cover"
-                    />
+                    {data.userImg ? (
+                        <img
+                            src={data.userImg}
+                            alt="avatar"
+                            className="w-12 h-12 rounded-full border object-cover"
+                        />
+                    ) : (
+                        <FaUserCircle className="w-12 h-12 border shadow-sm rounded-full" />
+
+                    )}
                     <div>
                         <Link to={`/userDetail/${data.userId}`}>
                             <h4 className="font-semibold cursor-pointer hover:text-amber-700 text-lg">{data.userName}</h4>
@@ -258,14 +277,13 @@ const PostDetail = () => {
                 </p>
             </div>
 
-            {/* Sağ tərəf - Comments */}
             <div className="w-full lg:w-[400px] bg-blue-50 p-4 rounded-lg shadow-xl h-fit lg:sticky lg:top-24">
                 <div className="flex items-center justify-between border-b pb-2 mb-2">
                     <h3 className="text-lg font-semibold text-blue-600">Comments</h3>
                     <span className="text-black font-semibold">({comments.length})</span>
                 </div>
 
-                <div className="space-y-4 md:h-[280px] lg:h-[380px] max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                <div ref={commentScroll} className="space-y-4 md:h-[280px] lg:h-[380px] max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
                     {comments.length > 0 ? (
                         comments.map((comment) => (
                             <div id={`comment-${comment.id}`} key={comment.id}>
@@ -310,6 +328,7 @@ const PostDetail = () => {
                     )}
                 </div>
             </div>
+
         </div>
     );
 

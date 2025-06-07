@@ -4,6 +4,11 @@ import { BiSolidMessageEdit } from "react-icons/bi";
 import Loader from "../components/Loader";
 import axios from "axios";
 import PostCard from "../components/Posts/PostCard";
+import UserListModal from "../components/User/UserListModal";
+import PostCreateModal from "../components/Posts/PostCreateModal";
+import { FaUserCircle } from "react-icons/fa";
+
+
 
 const MyProfile = () => {
     const [user, setUser] = useState({});
@@ -17,9 +22,26 @@ const MyProfile = () => {
     const [hasMore, setHasMore] = useState(true);
     const token = localStorage.getItem("token");
     const fileInputRef = useRef(null);
+    const [showModal, setShowModal] = useState(false);
+    const [modalUsers, setModalUsers] = useState([]);
+    const [modalTitle, setModalTitle] = useState("");
+    const [currentImage, setCurrentImage] = useState("");
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const openUserListModal = async (type) => {
+        setModalTitle(type === "following" ? "Following" : "Followers");
+        try {
+            const res = await axios.get(`${apiUrl}/UserFollow/GetAllMy${type === "following" ? "Following" : "Followers"}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
+            setModalUsers(res.data.$values || []);
+            setShowModal(true);
+        } catch (err) {
+            console.error(`Error fetching ${type}:`, err);
+        }
+    };
     const getAllSpecialization = async () => {
-        const res = await axios.get("https://localhost:7067/api/Specialization/GetAll", {
+        const res = await axios.get(`${apiUrl}/Specialization/GetAll`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         setSpecializations(res.data.$values);
@@ -29,7 +51,7 @@ const MyProfile = () => {
         if (loading || !hasMore) return;
         setLoading(true);
         try {
-            const res = await axios.get("https://localhost:7067/api/Post/GetMyPosts", {
+            const res = await axios.get(`${apiUrl}/Post/GetMyPosts`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { page }
             });
@@ -46,12 +68,14 @@ const MyProfile = () => {
 
     useEffect(() => {
         const myInfo = async () => {
-            const res = await axios.get("https://localhost:7067/api/Account/GetMyInfo", {
+            const res = await axios.get(`${apiUrl}/Account/GetMyInfo`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             })
             setUser(res.data)
+            setCurrentImage(res.data.imageUrl);
+
         }
         myInfo();
         getAllMyPosts();
@@ -80,7 +104,10 @@ const MyProfile = () => {
         setEditMode(!editMode);
     };
 
-    const cancelEdit = () => setEditMode(false);
+    const cancelEdit = () => {
+        setEditMode(false);
+        setUser(prev => ({ ...prev, imageUrl: currentImage }));
+    }
 
     const saveChanges = async () => {
         try {
@@ -92,12 +119,13 @@ const MyProfile = () => {
                 formData.append("imageFile", fileInputRef.current.files[0]);
             }
 
-            await axios.put("https://localhost:7067/api/Account/UpdateProfile", formData, {
+            await axios.put(`${apiUrl}/Account/UpdateProfile`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "multipart/form-data"
                 }
             });
+            window.location.reload()
 
             const specializationName = specializations.find(s => s.id.toString() === editableSpecialization)?.name || "";
             setUser(prev => ({
@@ -129,7 +157,7 @@ const MyProfile = () => {
     return (
         <div className="max-w-4xl mx-auto px-4 py-8 select-none">
             {loading && <Loader />}
-            <div className="bg-white rounded-2xl shadow p-6 relative flex flex-col md:flex-row items-center gap-6">
+            <div className="bg-amber-50 rounded-2xl shadow p-6 relative flex flex-col md:flex-row items-center gap-6">
                 {!editMode ? (
                     <BiSolidMessageEdit
                         onClick={toggleEdit}
@@ -147,11 +175,16 @@ const MyProfile = () => {
                 )}
 
                 <div className="relative group w-24 h-24">
-                    <img
-                        src={user.imageUrl}
-                        alt="Profil şəkli"
-                        className="w-full h-full rounded-full object-cover border-4 border-gray-200"
-                    />
+                    {user.imageUrl ? (
+                        <img
+                            src={user.imageUrl}
+                            alt="Profile"
+                            className="w-full h-full rounded-full object-cover border border-gray-300 shadow-md "
+                        />
+
+                    ) : (
+                        <FaUserCircle className="cursor-pointer  w-full h-full" />
+                    )}
                     {editMode && (
                         <>
                             <div
@@ -208,18 +241,21 @@ const MyProfile = () => {
                     <p className="text-sm text-gray-500">Posts</p>
                     <p className="text-xl font-semibold text-gray-800">{user.postCount}</p>
                 </div>
-                <div className="bg-gray-100 rounded-xl py-4">
+                <div onClick={() => openUserListModal("following")} className="bg-gray-100 cursor-pointer hover:bg-gray-200  duration-300 rounded-xl py-4">
                     <p className="text-sm text-gray-500">Following</p>
                     <p className="text-xl font-semibold text-gray-800">{user.followingCount}</p>
                 </div>
-                <div className="bg-gray-100 rounded-xl py-4">
+                <div onClick={() => openUserListModal("follower")} className="bg-gray-100 rounded-xl cursor-pointer hover:bg-gray-200  duration-300 py-4">
                     <p className="text-sm text-gray-500">Follower</p>
                     <p className="text-xl font-semibold text-gray-800">{user.followerCount}</p>
                 </div>
             </div>
-
             <div className="mt-10">
-                <h3 className="text-lg font-semibold mb-4">Posts</h3>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold mb-4">Posts</h3>
+                    <PostCreateModal />
+                </div>
+
                 <div className="grid gap-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1">
                     {posts.map((post, i) => (
                         <PostCard key={i} post={post} isMyProfile={true} />
@@ -227,6 +263,13 @@ const MyProfile = () => {
                 </div>
 
             </div>
+            {showModal && (
+                <UserListModal
+                    title={modalTitle}
+                    users={modalUsers}
+                    onClose={() => setShowModal(false)}
+                />
+            )}
         </div>
     );
 };

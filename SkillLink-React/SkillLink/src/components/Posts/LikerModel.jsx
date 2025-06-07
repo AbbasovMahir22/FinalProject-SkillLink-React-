@@ -5,12 +5,13 @@ import { Link } from 'react-router-dom';
 
 const LikerModal = ({ postId, isOpen, onClose }) => {
     const [likes, setLikes] = useState([]);
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (postId && isOpen) {
             const getLikers = async () => {
-                const likers = await axios.get(`https://localhost:7067/api/Like/GetAllLikersByPostId/${postId}`, {
+                const likers = await axios.get(`${apiUrl}/Like/GetAllLikersByPostId/${postId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -32,7 +33,7 @@ const LikerModal = ({ postId, isOpen, onClose }) => {
                         {likes.length > 0 ? likes.map(like => (
                             <Link key={like.userId} to={`/userDetail/${like.userId}`}>
 
-                                <div className="flex hover:bg-yellow-50 mt-3 items-center border-b rounded-xs transiation duration-300 hover:scale-105 space-x-3">
+                                <div className="flex hover:bg-gray-200 mt-3 items-center border-b rounded-xs transiation duration-300  space-x-3">
                                     <img
                                         src={like.userImage}
                                         alt={like.userName}

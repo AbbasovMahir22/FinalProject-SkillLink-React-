@@ -32,12 +32,11 @@ const PostCreateModal = () => {
           >
             <button
               onClick={closeModal}
-              className="absolute top-4 cursor-pointer right-2 text-black hover:text-red-600 text-[30px] font-bold"
+              className="absolute top-4 cursor-pointer right-0.5 text-black hover:text-red-600 text-[30px] font-bold"
             >
               &times;
             </button>
-
-            <PostCreateForm closeModal={closeModal} />
+              <PostCreateForm closeModal={closeModal} />
           </div>
         </div>
       )}

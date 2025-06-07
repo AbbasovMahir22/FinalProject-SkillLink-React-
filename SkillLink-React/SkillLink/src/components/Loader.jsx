@@ -2,7 +2,7 @@ import React from 'react';
 
 const Loader = () => {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-amber-50 bg-yellow/10 ">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-70 backdrop-blur-xs ">
             <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
         </div>
     );

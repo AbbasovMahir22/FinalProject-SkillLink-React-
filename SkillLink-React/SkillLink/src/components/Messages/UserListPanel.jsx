@@ -1,40 +1,70 @@
 import { useEffect, useState } from 'react';
+import { FaUserCircle } from "react-icons/fa";
 import axios from 'axios';
 
-export default function UserListPanel({ onUserSelect }) {
+export default function UserListPanel({ onUserSelect, className }) {
     const [users, setUsers] = useState([]);
+    const [selectedUserId, setSelectedUserId] = useState(null);
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const getUsers = async () => {
             const token = localStorage.getItem("token");
-            const datas = await axios.get("https://localhost:7067/api/PrivateChat/GetExistUsers", {
+            const response = await axios.get(`${apiUrl}/PrivateChat/GetExistUsers`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
+            });
+            setUsers(response.data.$values);
+        };
 
-            })
-            setUsers(datas.data.$values);
-
-        }
         getUsers();
     }, []);
 
+    const handleSelect = (user) => {
+        setSelectedUserId(user.id);
+        onUserSelect(user);
+    };
+
     return (
-        <div className="w-1/3 md:w-1/4 border-r  p-4 overflow-x-auto bg-cyan-50">
-            <h2 className="text-xl font-bold mb-4">Users</h2>
-            <ul>
-                {users.map(user => (
-                    <li
-                        key={user.id}
-                        onClick={() => onUserSelect(user)}
-                        className="cursor-pointer py-2 border-b-2  transition duration-300 hover:bg-yellow-300"
-                    >
-                        <div className='flex items-center justify-start gap-2'>
-                            <img src={user.imgUrl} className='w-[35px] h-[35px] rounded-full object-cover'/>
-                            <p className='text-[18px]'>{user.fullaname}</p>
-                        </div>
-                    </li>
-                ))}
+        <div className={`${className} bg-gradient-to-b w-full max-h-[650px] min-h-[650px] overflow-x-hidden  from-cyan-100 to-cyan-50 p-4 overflow-y-auto shadow-inner`}>
+            <h2 className="text-2xl font-semibold text-gray-700 mb-6 border-b pb-2">Users</h2>
+            <ul className="space-y-2">
+                {users.map(user => {
+                    const isSelected = user.id === selectedUserId;
+
+                    return (
+                        <li
+                            key={user.id}
+                            onClick={() => handleSelect(user)}
+                            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200
+                                group
+                                ${isSelected
+                                    ? 'bg-yellow-200 border border-yellow-400 shadow-md'
+                                    : 'hover:bg-yellow-100 hover:shadow-sm'}
+                            `}
+                        >
+                            {user.imgUrl ? (
+                                <img
+                                    src={user.imgUrl}
+                                    alt="User avatar"
+                                    className={`w-10 h-10 rounded-full object-cover border-2 transition
+                                    ${isSelected
+                                            ? 'border-yellow-500'
+                                            : 'border-cyan-300 group-hover:border-yellow-400'}
+                                `}
+                                />
+                            ) : (
+                                <FaUserCircle className='w-10 h-10' />
+                            )}
+                            <span className={`text-[16px] font-medium transition
+                                ${isSelected ? 'text-yellow-700' : 'text-gray-800 group-hover:text-yellow-600'}`}
+                            >
+                                {user.fullaname}
+                            </span>
+                        </li>
+                    );
+                })}
             </ul>
         </div>
     );

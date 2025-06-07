@@ -4,7 +4,7 @@ export function getUserIdFromToken() {
 
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.nameid || payload.sub || null; // `nameid` ASP.NET Core Identity-də istifadə olunur
+        return payload.nameid || payload.sub || null; // 
     } catch (err) {
         console.error("Invalid token", err);
         return null;

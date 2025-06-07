@@ -9,13 +9,14 @@ const UserPosts = ({ userId, filters }) => {
     const [pageNumber, setPageNumber] = useState(1);
     const [pageCount] = useState(6);
     const [totalPages, setTotalPages] = useState(1);
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     const fetchPosts = async () => {
         setLoading(true);
         const token = localStorage.getItem("token");
 
         try {
-            const res = await axios.get(`https://localhost:7067/api/Post/GetAll/${userId}`, {
+            const res = await axios.get(`${apiUrl}/Post/GetAll/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

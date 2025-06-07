@@ -11,6 +11,10 @@ import UserDetail from './pages/UserDetail';
 import EmailConfirm from './pages/EmailConfirm';
 import Settings from './pages/Settings';
 import MyProfile from './pages/MyProfile';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import ResetPassword from './pages/ResetPassword';
+
 
 
 
@@ -21,6 +25,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Authentication />} />
         <Route path="/confirm-email" element={<EmailConfirm />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/"
           element={
@@ -37,6 +42,8 @@ function App() {
           <Route path="userdetail/:id" element={<UserDetail />} />
           <Route path="settings" element={<Settings />} />
           <Route path="myProfile" element={<MyProfile />} />
+          <Route path="terms" element={<Terms />} />
+          <Route path="privacy" element={<Privacy />} />
         </Route>
       </Routes>
     </Router>

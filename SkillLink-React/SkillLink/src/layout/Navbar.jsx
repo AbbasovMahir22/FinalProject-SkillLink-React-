@@ -6,12 +6,15 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import logo from "../assets/Images/SkillLink.png";
 
+
 const Navbar = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState({});
     const [menuOpen, setMenuOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef(null);
+    const apiUrl = import.meta.env.VITE_API_URL;
+
 
     const toggleMenu = () => setMenuOpen(!menuOpen);
     const toggleProfile = () => setProfileOpen(!profileOpen);
@@ -22,7 +25,7 @@ const Navbar = () => {
             if (!token) return;
             try {
                 const userInfo = await axios.get(
-                    "https://localhost:7067/api/Account/GetUserInfo",
+                    `${apiUrl}/Account/GetUserInfo`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -105,11 +108,15 @@ const Navbar = () => {
                     </div>
 
                     <button onClick={toggleProfile} className="relative flex-shrink-0" title="Profile">
-                        <img
-                            src={user.imageUrl}
-                            alt="Profile"
-                            className="w-[46px] h-[46px] rounded-full object-cover border border-gray-300 shadow-md cursor-pointer"
-                        />
+                        {user.imageUrl ? (
+                            <img
+                                src={user.imageUrl}
+                                alt="Profile"
+                                className="w-[46px] h-[46px] rounded-full object-cover border border-gray-300 shadow-md cursor-pointer"
+                            />
+                        ) : (
+                            <FaUserCircle className="cursor-pointer w-[46px] h-[46px]" />
+                        )}
                     </button>
 
                     {profileOpen && (
@@ -122,7 +129,15 @@ const Navbar = () => {
                                 to="myProfile"
                                 className=" px-1 py-2 text-gray-700 hover:bg-gray-200 flex items-center gap-2"
                             >
-                                <img className="w-[40px] h-[40px] rounded-full" src={user.imageUrl} />
+                                {user.imageUrl ? (
+                                    <img
+                                        src={user.imageUrl}
+                                        alt="Profile"
+                                        className="w-[46px] h-[46px] rounded-full object-cover border border-gray-300 shadow-md cursor-pointer"
+                                    />
+                                ) : (
+                                    <FaUserCircle className="cursor-pointer w-[46px] h-[46px]" />
+                                )}
                                 My Profile
                             </Link>
                             <Link onClick={() => setProfileOpen(false)}
@@ -172,7 +187,7 @@ const Navbar = () => {
                         Notifications
                     </Link>
 
-                    <Link onClick={() => setMenuOpen(false)} to={`/myprofile/${user.id}`} className="text-gray-700 transition-all duration-300 hover:text-2xl  font-semibold hover:text-blue-600 flex items-center gap-2">
+                    <Link onClick={() => setMenuOpen(false)} to="/myprofile" className="text-gray-700 transition-all duration-300 hover:text-2xl  font-semibold hover:text-blue-600 flex items-center gap-2">
                         <FaUserCircle className="text-blue-600 text-2xl" />
                         My Profile
                     </Link>

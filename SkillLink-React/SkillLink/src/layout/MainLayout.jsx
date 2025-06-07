@@ -13,7 +13,7 @@ export const showNotification = (message) => {
 
     MySwal.fire({
         toast: true,
-        position: 'top-end',
+        position: 'top',
         showConfirmButton: false,
         timer: 4000,
         timerProgressBar: true,

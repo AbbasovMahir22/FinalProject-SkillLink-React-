@@ -6,14 +6,14 @@ export default function ConfirmEmail() {
     const [searchParams] = useSearchParams();
     const [message, setMessage] = useState("Redirecting...");
     const [status, setStatus] = useState("loading");
-
+    const apiUrl = import.meta.env.VITE_API_URL;
     useEffect(() => {
         const userId = searchParams.get("userId");
         const token = searchParams.get("token");
 
         if (userId && token) {
             axios
-                .get(`https://localhost:7067/api/account/ConfirmEmail`, {
+                .get(`${apiUrl}/account/ConfirmEmail`, {
                     params: { userId, token },
                 })
                 .then(() => {

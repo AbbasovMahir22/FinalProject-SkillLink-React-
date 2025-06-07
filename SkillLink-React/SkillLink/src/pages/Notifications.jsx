@@ -3,19 +3,21 @@ import axios from "axios";
 import { FaBell } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Loader from '../components/Loader';
+import { FaUserCircle } from "react-icons/fa";
 import NotificationFilter from "../components/Notification/NotificationFilter";
 
 const Notifications = () => {
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [filterType, setFilterType] = useState("All");
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     setLoading(true);
     const fetchNotifications = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("https://localhost:7067/api/Notification/GetAll", {
+        const response = await axios.get(`${apiUrl}/Notification/GetAll`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -60,11 +62,15 @@ const Notifications = () => {
                 key={index}
                 className="flex flex-col sm:flex-row items-start gap-3 bg-gray-200 hover:bg-cyan-200 p-4 rounded-lg shadow-sm transition-all duration-300"
               >
-                <img
-                  src={n.userImg || "/default-avatar.png"}
-                  alt="User"
-                  className="w-12 h-12 rounded-full object-cover border shadow-sm"
-                />
+                {n.userImage ? (
+                  <img
+                    src={n.userImg}
+                    alt="User"
+                    className="w-12 h-12 rounded-full object-cover border shadow-sm"
+                  />
+                ) : (
+                  <FaUserCircle className="w-12 h-12 border shadow-sm rounded-full" />
+                )}
                 <div className="flex-1 w-full">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2">
                     <Link

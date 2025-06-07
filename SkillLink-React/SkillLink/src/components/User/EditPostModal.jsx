@@ -13,6 +13,7 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
     const [mediaPreview, setMediaPreview] = useState(post?.mediaUrl || "");
     const [isVideo, setIsVideo] = useState(post?.isVideo || false);
     const token = localStorage.getItem("token");
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         setTitle(post?.title || "");
@@ -29,7 +30,7 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
 
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("https://localhost:7067/api/Category/GetAll", {
+                const response = await axios.get(`${apiUrl}/Category/GetAll`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -52,7 +53,7 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
 
         const fetchSubCategories = async () => {
             try {
-                const response = await axios.get(`https://localhost:7067/api/SubCategory/GetSubCategoriesByCategoryId/${categoryId}`, {
+                const response = await axios.get(`${apiUrl}/SubCategory/GetSubCategoriesByCategoryId/${categoryId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

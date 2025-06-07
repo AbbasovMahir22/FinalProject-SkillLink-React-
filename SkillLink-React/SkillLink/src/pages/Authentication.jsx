@@ -4,14 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Swal from 'sweetalert2';
 import { toast, ToastContainer } from 'react-toastify';
+import { ClipLoader } from 'react-spinners';
 import 'react-toastify/dist/ReactToastify.css';
 import SpecializationModal from '../components/Auth/SpecializationModal';
 function Authentication() {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    
     const [showModal, setShowModal] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [message, setMessage] = useState("");
     const [showPasswords, setShowPasswords] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         FullName: '',
         UserName: '',
@@ -37,7 +41,7 @@ function Authentication() {
     const handleForgotPassword = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post('https://localhost:7067/api/Account/ForgotPassword', { email: forgotEmail });
+            const res = await axios.post(`${apiUrl}/Account/ForgotPassword`, { email: forgotEmail });
             Swal.fire("Success", "If the email exists, a reset link has been sent.", "success");
             setForgotEmail("");
             setIsForgotPassword(false);
@@ -48,9 +52,10 @@ function Authentication() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true)
         try {
             if (isLogin) {
-                const res = await axios.post('https://localhost:7067/api/Account/Login', {
+                const res = await axios.post(`${apiUrl}/Account/Login`, {
                     email: form.email,
                     password: form.password,
                 });
@@ -59,12 +64,15 @@ function Authentication() {
                     localStorage.setItem('token', res.data.token);
                     if (!res.data.hasSpecialization) {
                         setShowModal(true);
+                        setLoading(false);
                     }
                     else {
                         navigate('/');
+                        setLoading(false);
                     }
                 } else {
-                    setMessage(res.data.errorMessage);
+                    toast.error(res.data.errorMessage);
+                    setLoading(false);
                 }
             } else {
                 if (form.password !== form.confirmPassword) {
@@ -73,8 +81,9 @@ function Authentication() {
                 }
 
                 const { confirmPassword, ...registerData } = form;
-                const res = await axios.post('https://localhost:7067/api/Account/Register', registerData);
-
+                setLoading(true)
+                const res = await axios.post(`${apiUrl}https://localhost:7067/api/Account/Register`, registerData);
+                setLoading(false)
                 if (res.data) {
                     setForm({ FullName: '', UserName: '', email: '', password: '', confirmPassword: '' });
                     setIsLogin(true);
@@ -84,13 +93,26 @@ function Authentication() {
                 }
             }
         } catch (err) {
-            toast.error(err.response.data);
+            const errorData = err.response?.data;
+            setLoading(false);
+            if (Array.isArray(errorData)) {
+                if (errorData.length > 0) {
+                    toast.error(errorData[0]);
+                    console.log(errorData[0]);
+                }
+            } else if (typeof errorData === "string") {
+                toast.error(errorData);
+                console.log(errorData);
+            } else {
+                toast.error("Something went wrong.");
+            }
         }
-    };
+    }
 
     return (
         <div
-            className="min-h-screen flex items-center justify-center" >
+            className="min-h-screen flex items-center justify-center bg-gradient-to-r from-cyan-600  to-orange-400 text-white"
+ >
             <SpecializationModal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
@@ -99,7 +121,7 @@ function Authentication() {
                     navigate('/');
                 }}
             />
-            <div className="opacity-90 bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
+            <div className="opacity-90 border bg-cyan-900  backdrop-blur-md  scale-110  rounded-xl p-8 w-full max-w-md">
                 <h1 className='text-center text-4xl font-bold mb-2.5'>
                     <span className="text-sky-500">Skill</span>
                     <span className="text-orange-500">Link</span>
@@ -107,7 +129,7 @@ function Authentication() {
 
                 {!isForgotPassword ? (
                     <>
-                        <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">
+                        <h2 className="text-2xl font-bold text-center mb-6 text-blue-400">
                             {isLogin ? 'Login to Your Account' : 'Create a New Account'}
                         </h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -120,6 +142,7 @@ function Authentication() {
                                         onChange={handleChange}
                                         placeholder="Full Name"
                                         className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                        autoComplete="off"
                                         required
                                     />
                                     <input
@@ -130,6 +153,7 @@ function Authentication() {
                                         placeholder="User Name"
                                         className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
                                         required
+                                        autoComplete="off"
                                     />
                                 </div>
                             )}
@@ -142,6 +166,7 @@ function Authentication() {
                                 placeholder="Email"
                                 className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
                                 required
+                                autoComplete="off"
                             />
 
                             <div className="relative">
@@ -153,11 +178,12 @@ function Authentication() {
                                     placeholder="Password"
                                     className="input w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
                                     required
+                                    autoComplete="off"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPasswords(!showPasswords)}
-                                    className="absolute right-3 top-2.5 text-gray-600"
+                                    className="absolute right-3 cursor-pointer hover:text-red-600 duration-300 top-2.5 text-gray-200"
                                 >
                                     {showPasswords ? <FaEye /> : <FaEyeSlash />}
                                 </button>
@@ -170,8 +196,9 @@ function Authentication() {
                                     value={form.confirmPassword}
                                     onChange={handleChange}
                                     placeholder="Confirm Password"
-                                    className="input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-400"
+                                    className="input w-full px-4 py-2 text-white border border-gray-300 rounded-md focus:outline-none focus:ring-orange-400"
                                     required
+                                    autoComplete="off"
                                 />
                             )}
 
@@ -181,7 +208,9 @@ function Authentication() {
                                 type="submit"
                                 className="w-full text-[20px] font-bold bg-gradient-to-r from-orange-400 to-sky-400 cursor-pointer text-black py-2 rounded-md hover:from-sky-500 hover:to-orange-500 hover:text-white transition"
                             >
-                                {isLogin ? 'Login' : 'Register'}
+                                {loading ? <ClipLoader size={20} color="#fff" /> : isLogin ? 'Login' : 'Register'}
+
+
                             </button>
                         </form>
 
@@ -189,7 +218,7 @@ function Authentication() {
                             <p className="text-left  text-sm mt-2 ">
                                 <button
                                     onClick={() => setIsForgotPassword(true)}
-                                    className="text-blue-600 cursor-pointer font-semibold hover:underline"
+                                    className="text-white cursor-pointer font-semibold hover:underline"
                                 >
                                     Forgot Password?
 
@@ -197,7 +226,7 @@ function Authentication() {
                             </p>
                         )}
 
-                        <p className="text-center text-gray-600 mt-4">
+                        <p className="text-center text-white mt-4">
                             {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
                             <button
                                 onClick={changeForm}
@@ -209,7 +238,7 @@ function Authentication() {
                     </>
                 ) : (
                     <>
-                        <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">
+                        <h2 className="text-2xl font-bold text-center mb-6 text-white">
                             Reset Your Password
                         </h2>
                         <form onSubmit={handleForgotPassword} className="space-y-4">
@@ -220,18 +249,19 @@ function Authentication() {
                                 placeholder="Enter your email"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
                                 required
+                                autoComplete="off"
                             />
                             <button
                                 type="submit"
-                                className="w-full text-[20px] font-bold bg-gradient-to-r from-orange-400 to-sky-400 text-black py-2 rounded-md cursor-po hover:from-sky-500 hover:to-orange-500 hover:text-white transition"
+                                className="w-full text-[20px] font-bold bg-gradient-to-r from-orange-400 to-sky-400  py-2 rounded-md text-white cursor-pointer hover:from-sky-500 hover:to-orange-500 hover:text-white transition"
                             >
-                                Send Reset Link
+                                Send Email
                             </button>
                         </form>
                         <p className="text-center mt-4">
                             <button
                                 onClick={() => setIsForgotPassword(false)}
-                                className="text-blue-600 cursor-pointer font-semibold hover:underline"
+                                className="text-white cursor-pointer font-semibold hover:underline"
                             >
                                 Back to Login
                             </button>

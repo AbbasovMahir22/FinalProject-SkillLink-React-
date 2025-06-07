@@ -1,42 +1,72 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { FaUserCircle } from "react-icons/fa";
+import UserListModal from "./UserListModal";
+
 
 const UserInfo = ({ userInfo }) => {
     const [isFollow, setIsFollow] = useState();
-
+    const token = localStorage.getItem("token");
+    const [modalTitle, setModalTitle] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [modalUsers, setModalUsers] = useState([]);
+    const [followCount, setFollowCount] = useState();
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         setIsFollow(userInfo.follow);
+        setFollowCount(userInfo.followerCount);
     }, [userInfo.follow])
 
     const followOrUnFollow = async () => {
-        const token = localStorage.getItem("token");
+
         if (!isFollow) {
-            await axios.post(`https://localhost:7067/api/UserFollow/Create/${userInfo.id}`, {}, {
+            await axios.post(`${apiUrl}UserFollow/Create/${userInfo.id}`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
             })
             setIsFollow(!isFollow);
+            setFollowCount(prev => prev + 1);
 
         } else {
-            await axios.delete(`https://localhost:7067/api/UserFollow/Delete/${userInfo.id}`, {
+            await axios.delete(`${apiUrl}/UserFollow/Delete/${userInfo.id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
             })
             setIsFollow(!isFollow);
+            setFollowCount(prev => prev - 1);
+
 
         }
     }
+    const openUserListModal = async (type) => {
+        setModalTitle(type === "following" ? "Following" : "Followers");
+        try {
+            const res = await axios.get(`${apiUrl}/UserFollow/GetAllByUserId${type === "following" ? "Following" : "Follower"}/${userInfo.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setModalUsers(res.data.$values || []);
+            setShowModal(true);
+        } catch (err) {
+            console.error(`Error fetching ${type}:`, err);
+        }
+    };
     return (
         <div className="bg-amber-50 rounded-2xl shadow p-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4 w-full md:w-auto">
-                <img
-                    src={userInfo.imageUrl}
-                    alt={userInfo.fullName}
-                    className="w-[45px] h-[45px] sm:w-24 sm:h-24  rounded-full border-4 border-white shadow-md object-cover"
-                />
+                {userInfo.imageUrl ? (
+                    <img
+                        src={userInfo.imageUrl}
+                        alt="Profile"
+                        className="w-24 h-24 rounded-full object-cover border border-gray-300 shadow-md "
+                    />
+
+                ) : (
+                    <FaUserCircle className="cursor-pointer w-24 h-24" />
+                )}
                 <div className="sm:text-start  md:text-left">
                     <div className=" sm:block md:block lg:flex gap-3   items-start">
                         <div>
@@ -61,15 +91,23 @@ const UserInfo = ({ userInfo }) => {
                     <p className="text-sm text-gray-500">Posts</p>
                     <p className="text-xl font-semibold text-gray-800">{userInfo.postCount}</p>
                 </div>
-                <div className="cursor-pointer hover:text-red-500 transition duration-300">
+                <button onClick={() => openUserListModal("following")} className="cursor-pointer hover:text-red-500 transition duration-300">
                     <p className="text-sm text-gray-500">Following</p>
                     <p className="text-xl font-semibold">{userInfo.follwingCount}</p>
-                </div>
-                <div className="cursor-pointer hover:text-red-500 transition duration-300">
+                </button>
+                <button onClick={() => openUserListModal("follower")} className="cursor-pointer hover:text-red-500 transition duration-300">
                     <p className="text-sm text-gray-500">Followers</p>
-                    <p className="text-xl font-semibold">{userInfo.followerCount}</p>
-                </div>
+                    <p className="text-xl font-semibold">{followCount}</p>
+                </button>
             </div>
+            {showModal && (
+                <UserListModal
+                    title={modalTitle}
+                    users={modalUsers}
+                    onClose={() => setShowModal(false)}
+                    onUserClick={() => setShowModal(false)}
+                />
+            )}
         </div>
     );
 };

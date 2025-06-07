@@ -8,6 +8,9 @@ import axios from 'axios';
 import { Loader } from 'lucide-react';
 import { MdDelete } from "react-icons/md";
 import { GrEdit } from "react-icons/gr";
+import Swal from 'sweetalert2';
+import { FaUserCircle } from "react-icons/fa";
+
 
 const truncateWords = (text, maxWords) => {
     if (!text) return "";
@@ -44,6 +47,7 @@ const PostCard = ({ post, isMyProfile = false }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [currentPost, setCurrentPost] = useState(post);
     const [loading, setLoading] = useState(false);
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     const openEditModal = (e) => {
         e.stopPropagation();
@@ -54,22 +58,36 @@ const PostCard = ({ post, isMyProfile = false }) => {
         setIsEditModalOpen(false);
 
         const token = localStorage.getItem("token");
+        try {
 
-        const response = await axios.put(`https://localhost:7067/api/Post/Update/${post.id}`, updatedPost, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'multipart/form-data'
-            }
-        });
+            const response = await axios.put(`${apiUrl}/Post/Update/${post.id}`, updatedPost, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
 
-        setCurrentPost(response.data);
-        setLoading(false);
-    };
+            setCurrentPost(response.data);
+            setLoading(false);
+        }
+        catch (error) {
+            console.log(error);
+
+            setLoading(false);
+            Swal.fire({
+                icon: 'error',
+                title: 'An error occurred',
+                text: error.response?.data?.detail || 'Please try again',
+                confirmButtonColor: '#d33'
+            });
+        }
+    }
+
 
     const goToDetail = () => navigate(`/PostDetail/${currentPost.id}`);
 
     return (
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden transition duration-300 cursor-pointer hover:shadow-2xl hover:scale-[1.02] select-none relative max-w-sm w-full flex flex-col h-auto">
+        <div className="bg-gray-200 rounded-lg shadow-2xl overflow-hidden transition duration-300 cursor-pointer hover:shadow-yellow-950 hover:scale-[1.01] select-none relative max-w-sm w-full flex flex-col h-auto">
             {loading && <Loader />}
             {isMyProfile && (
                 <div>
@@ -83,7 +101,7 @@ const PostCard = ({ post, isMyProfile = false }) => {
                         onClick={async (e) => {
                             e.stopPropagation();
                             const token = localStorage.getItem("token");
-                            await axios.delete(`https://localhost:7067/api/Post/Delete/${post.id}`, {
+                            await axios.delete(`${apiUrl}/Post/Delete/${post.id}`, {
                                 headers: { Authorization: `Bearer ${token}` }
                             });
                             window.location.reload();
@@ -116,17 +134,22 @@ const PostCard = ({ post, isMyProfile = false }) => {
                     >
                         <FaPlay className="text-3xl" />
                     </button>
-                    <div className='absolute top-3 left-3 bg-amber-300 bg-opacity-90 px-2 py-0.5 rounded-md text-xs font-semibold text-gray-800 shadow-md'>
+                    <div className='absolute top-3  left-3 bg-amber-300 bg-opacity-90 px-2 py-0.5 rounded-md text-xs font-semibold text-gray-800 shadow-md'>
                         {currentPost.category}{currentPost.subCategory ? ` / ${currentPost.subCategory}` : ""}
                     </div>
                 </div>
             ) : (
                 <Link to={`/PostDetail/${currentPost.id}`} className="block relative group">
-                    <img
-                        src={currentPost.mediaUrl}
-                        alt={currentPost.title || "Post media"}
-                        className="w-full h-48 sm:h-56 object-cover rounded-t-lg transition-transform duration-300 group-hover:scale-105"
-                    />
+                    {currentPost.mediaUrl ? (
+                        <img
+                            src={currentPost.mediaUrl}
+                            alt={currentPost.title || "Post media"}
+                            className="w-full h-48 sm:h-56 object-cover rounded-t-lg transition-transform duration-300 group-hover:scale-105"
+                        />
+                    ) : (
+                        <FaUserCircle className="w-48 h-48 border shadow-sm rounded-full transiation duration-300 group-hover:scale-105" />
+
+                    )}
                     <div className='absolute top-3 left-3 bg-amber-300 bg-opacity-90 px-2 py-0.5 rounded-md text-xs font-semibold text-gray-800 shadow-md'>
                         {currentPost.category}{currentPost.subCategory ? ` / ${currentPost.subCategory}` : ""}
                     </div>
@@ -137,11 +160,15 @@ const PostCard = ({ post, isMyProfile = false }) => {
                 <div>
                     <div className="flex items-center gap-3 mb-3">
                         <Link to={`/UserDetail/${currentPost.appUserId}`} className="flex items-center gap-2 hover:opacity-80">
-                            <img
-                                src={currentPost.userImage}
-                                alt={currentPost.userName || "User avatar"}
-                                className='w-9 h-9 rounded-full object-cover border shadow-sm'
-                            />
+                            {currentPost.userImage ? (
+                                <img
+                                    src={currentPost.userImage}
+                                    alt={currentPost.userName || "User avatar"}
+                                    className='w-9 h-9 rounded-full object-cover border shadow-sm'
+                                />
+                            ) : (
+                                <FaUserCircle className='w-9 h-9' />
+                            )}
                             <h1 className="text-sm font-semibold text-gray-900 hover:text-red-500">{currentPost.userName}</h1>
                         </Link>
                     </div>
@@ -155,7 +182,7 @@ const PostCard = ({ post, isMyProfile = false }) => {
                 <div className='flex items-center justify-between text-lg text-gray-700 pt-2 border-t border-gray-200'>
                     <button
                         onClick={() => setIsLikeModalOpen(true)}
-                        className='flex items-center hover:shadow-2xl gap-1 text-red-600 hover:text-red-800'
+                        className='flex items-center cursor-pointer hover:shadow-2xl gap-1 text-red-600 hover:text-red-800'
                     >
                         <AiFillLike />
                         <span className='font-semibold text-sm'>{currentPost.likeCount}</span>
