@@ -117,7 +117,7 @@ const PostDetail = () => {
 
         setLoading(true);
         const token = localStorage.getItem("token");
-        const res = await axios.get(`apiUrl/Post/GetPostFullData/${id}`, {
+        const res = await axios.get(`${apiUrl}/Post/GetPostFullData/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         setData(res.data);
