@@ -66,7 +66,7 @@ const Comment = ({ comment, commentDelete, handleEdit }) => {
         const token = localStorage.getItem("token");
 
         if (!liked) {
-            await axios.post(`https://localhost:7067/api/Like/CreateCommentLike/${comment.id}`,
+            await axios.post(`${apiUrl}/Like/CreateCommentLike/${comment.id}`,
                 {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });

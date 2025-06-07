@@ -154,6 +154,13 @@ const MyProfile = () => {
         }
     };
 
+    const handleModalClose = () => {
+        setShowModal(false);
+        setTimeout(() => {
+            window.location.reload();
+        }, 300);
+    };
+
     return (
         <div className="max-w-4xl mx-auto px-4 py-8 select-none">
             {loading && <Loader />}
@@ -267,7 +274,7 @@ const MyProfile = () => {
                 <UserListModal
                     title={modalTitle}
                     users={modalUsers}
-                    onClose={() => setShowModal(false)}
+                    onClose={handleModalClose}
                 />
             )}
         </div>

@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import SpecializationModal from '../components/Auth/SpecializationModal';
 function Authentication() {
     const apiUrl = import.meta.env.VITE_API_URL;
-    
+
     const [showModal, setShowModal] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -82,7 +82,7 @@ function Authentication() {
 
                 const { confirmPassword, ...registerData } = form;
                 setLoading(true)
-                const res = await axios.post(`${apiUrl}https://localhost:7067/api/Account/Register`, registerData);
+                const res = await axios.post(`${apiUrl}/Account/Register`, registerData);
                 setLoading(false)
                 if (res.data) {
                     setForm({ FullName: '', UserName: '', email: '', password: '', confirmPassword: '' });
@@ -112,7 +112,7 @@ function Authentication() {
     return (
         <div
             className="min-h-screen flex items-center justify-center bg-gradient-to-r from-cyan-600  to-orange-400 text-white"
- >
+        >
             <SpecializationModal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}

@@ -130,7 +130,7 @@ const PostCard = ({ post, isMyProfile = false }) => {
                             goToDetail();
                         }}
                         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-4"
-                        aria-label="Play Video"
+
                     >
                         <FaPlay className="text-3xl" />
                     </button>
@@ -159,18 +159,33 @@ const PostCard = ({ post, isMyProfile = false }) => {
             <div className="p-4 flex flex-col flex-1 justify-between">
                 <div>
                     <div className="flex items-center gap-3 mb-3">
-                        <Link to={`/UserDetail/${currentPost.appUserId}`} className="flex items-center gap-2 hover:opacity-80">
-                            {currentPost.userImage ? (
-                                <img
-                                    src={currentPost.userImage}
-                                    alt={currentPost.userName || "User avatar"}
-                                    className='w-9 h-9 rounded-full object-cover border shadow-sm'
-                                />
-                            ) : (
-                                <FaUserCircle className='w-9 h-9' />
-                            )}
-                            <h1 className="text-sm font-semibold text-gray-900 hover:text-red-500">{currentPost.userName}</h1>
-                        </Link>
+                        {isMyProfile ? (
+                            <div className="flex items-center gap-2 hover:opacity-80">
+                                {currentPost.userImage ? (
+                                    <img
+                                        src={currentPost.userImage}
+                                        alt={currentPost.userName || "User avatar"}
+                                        className='w-9 h-9 rounded-full object-cover border shadow-sm'
+                                    />
+                                ) : (
+                                    <FaUserCircle className='w-9 h-9' />
+                                )}
+                                <h1 className="text-sm font-semibold text-gray-900 ">{currentPost.userName}</h1>
+                            </div>
+                        ) : (
+                            <Link to={`/UserDetail/${currentPost.appUserId}`} className="flex items-center gap-2 hover:opacity-80">
+                                {currentPost.userImage ? (
+                                    <img
+                                        src={currentPost.userImage}
+                                        alt={currentPost.userName || "User avatar"}
+                                        className='w-9 h-9 rounded-full object-cover border shadow-sm'
+                                    />
+                                ) : (
+                                    <FaUserCircle className='w-9 h-9' />
+                                )}
+                                <h1 className="text-sm font-semibold text-gray-900 hover:text-red-500">{currentPost.userName}</h1>
+                            </Link>
+                        )}
                     </div>
 
                     <h2 className="text-base font-medium text-gray-900 mb-2 line-clamp-2">{currentPost.title}</h2>

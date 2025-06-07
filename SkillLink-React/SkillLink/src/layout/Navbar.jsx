@@ -5,9 +5,11 @@ import { stopConnection } from "../signalR";
 import Swal from "sweetalert2";
 import axios from "axios";
 import logo from "../assets/Images/SkillLink.png";
-
+import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
+    const location = useLocation();
+    const currentPath = location.pathname;
     const navigate = useNavigate();
     const [user, setUser] = useState({});
     const [menuOpen, setMenuOpen] = useState(false);
@@ -83,20 +85,40 @@ const Navbar = () => {
                 </Link>
 
                 <div className="hidden lg:flex items-center gap-10 text-gray-700 font-medium tracking-wide">
-                    <Link to="/" className="flex items-center gap-2 hover:text-blue-600" title="Home">
-                        <FaHome className="text-blue-600 text-3xl" />
+                    <Link
+                        to="/"
+                        className={`flex items-center gap-2 ${currentPath === "/" ? "text-blue-600 font-bold" : "text-gray-700"
+                            } hover:text-blue-600`}
+                        title="Home"
+                    >
+                        <FaHome className="text-3xl" />
                         <span className="text-lg">Home</span>
                     </Link>
-                    <Link to="/explore" className="flex items-center gap-2 hover:text-blue-600" title="Discover">
-                        <FaCompass className="text-blue-600 text-3xl" />
+                    <Link
+                        to="/explore"
+                        className={`flex items-center gap-2 ${currentPath === "/explore" ? "text-cyan-600 font-bold" : "text-gray-700"
+                            } hover:text-blue-600`}
+                        title="Explore"
+                    >
+                        <FaCompass className="text-3xl" />
                         <span className="text-lg">Explore</span>
                     </Link>
-                    <Link to="/messages" className="flex items-center gap-2 hover:text-blue-600" title="Messages">
-                        <FaEnvelope className="text-blue-600 text-3xl" />
+                    <Link
+                        to="/messages"
+                        className={`flex items-center gap-2 ${currentPath === "/messages" ? "text-green-600 font-bold" : "text-gray-700"
+                            } hover:text-blue-600`}
+                        title="Messages"
+                    >
+                        <FaEnvelope className="text-3xl" />
                         <span className="text-lg">Messages</span>
                     </Link>
-                    <Link to="/notifications" className="flex items-center gap-2 hover:text-blue-600" title="Notifications">
-                        <FaBell className="text-blue-600 text-3xl" />
+                    <Link
+                        to="/notifications"
+                        className={`flex items-center gap-2 ${currentPath === "/notifications" ? "text-yellow-600 font-bold" : "text-gray-700"
+                            } hover:text-blue-600`}
+                        title="Notifications"
+                    >
+                        <FaBell className="text-3xl" />
                         <span className="text-lg">Notifications</span>
                     </Link>
                 </div>

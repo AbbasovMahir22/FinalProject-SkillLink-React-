@@ -39,7 +39,7 @@ const UserListModal = ({ title, users, onClose, onUserClick }) => {
             setUserList(updatedUsers);
 
         } catch (err) {
-            console.log("Error");
+            console.error(err);
         }
     };
     return (

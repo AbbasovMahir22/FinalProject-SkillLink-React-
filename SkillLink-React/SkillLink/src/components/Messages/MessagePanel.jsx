@@ -6,9 +6,10 @@ import * as signalR from "@microsoft/signalr";
 import { Link } from 'react-router-dom';
 import { IoReturnUpBackSharp } from "react-icons/io5";
 import { FaUserCircle } from "react-icons/fa";
+import FakeIMage from '../../assets/Images/FakeImage.jpg';
 
-// import { toast, ToastContainer } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 export default function MessagePanel({ selectedUser, onBack }) {
@@ -85,8 +86,28 @@ export default function MessagePanel({ selectedUser, onBack }) {
                 .build();
 
             connection.on("ReceiveMessage", (message) => {
-                if (selectedUser.id == message.senderId) {
+                if (selectedUser && selectedUser.id == message.senderId) {
                     setMessages(prev => [...prev, message]);
+                } else {
+                    toast.info(
+                        <div className="flex items-center gap-3">
+                            <img
+                                src={message.senderImg || FakeIMage}
+                                alt="avatar"
+                                className="w-15 h-15 rounded-full object-cover border border-gray-300"
+                            />
+                            <div>
+                                <p className="text-sm font-semibold">{message.senderFullName}</p>
+                                <p className="text-xs text-gray-600">New message</p>
+                            </div>
+                        </div>,
+                        {
+                            position: "top-right",
+                            autoClose: 3000,
+                        }
+                    );
+
+
                 }
             });
             connection.on("UpdateMessage", (editedMessage) => {
@@ -153,6 +174,7 @@ export default function MessagePanel({ selectedUser, onBack }) {
 
     return (
         <div className="flex-1 p-4 flex flex-col bg-cyan-50 min-h-[650px] max-h-[650px]">
+            <ToastContainer />
             <div className="md:hidden mb-4">
                 <button
                     onClick={onBack}
