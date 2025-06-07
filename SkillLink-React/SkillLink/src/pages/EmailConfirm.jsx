@@ -10,7 +10,8 @@ export default function ConfirmEmail() {
     useEffect(() => {
         const userId = searchParams.get("userId");
         const token = searchParams.get("token");
-
+        console.log("UserId:", userId);
+        console.log("Token:", token);
         if (userId && token) {
             axios
                 .get(`${apiUrl}/account/ConfirmEmail`, {
