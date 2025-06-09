@@ -167,8 +167,9 @@ export default function MessagePanel({ selectedUser, onBack }) {
             ]);
 
             setValues("");
-        } catch (error) {
-            console.error("Mesaj gonderme xetasi:", error);
+        } catch (err) {
+            toast.error(err.response.data.detail);
+            
         }
     };
 

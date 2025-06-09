@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import PostCard from "../components/Posts/PostCard";
 import axios from "axios";
 import Loader from '../components/Loader';
-import { FaSearch } from "react-icons/fa";
 
 function Explore() {
   const [posts, setPosts] = useState([]);

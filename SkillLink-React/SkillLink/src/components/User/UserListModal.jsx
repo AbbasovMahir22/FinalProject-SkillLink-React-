@@ -54,10 +54,10 @@ const UserListModal = ({ title, users, onClose, onUserClick }) => {
                         <div className="sticky -top-6 p-2 bg-yellow-50">
                             <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} type="text" className="w-full border p-2  bg-gray-100 rounded" />
                         </div>
-                        <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                        <div className="space-y-3 max-h-[300px] ">
                             {searchUser.map((user, i) => (
                                 <div key={i} className="flex items-center  justify-between gap-3 duration-300 cursor-pointer p-2 hover:bg-amber-200">
-                                    <div className="flex items-center gap-3 overflow-y-auto ">
+                                    <div className="flex items-center gap-3  ">
                                         {user.userImg ? (
                                             <img src={user.userImg} className="w-10 h-10 rounded-full object-cover" />
                                         ) : (
