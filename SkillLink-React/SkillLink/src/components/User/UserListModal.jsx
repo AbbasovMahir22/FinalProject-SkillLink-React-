@@ -44,7 +44,7 @@ const UserListModal = ({ title, users, onClose, onUserClick }) => {
     };
     return (
         <div className="fixed inset-0 backdrop-blur-xs  bg-opacity-40 flex justify-center items-center z-50">
-            <div className="bg-yellow-50  realative max-h-60 overflow-y-auto  rounded-xl shadow-lg p-6 w-full max-w-md relative">
+            <div className="bg-yellow-50  realative max-h-72 overflow-y-auto  rounded-xl shadow-lg p-6 w-full max-w-md relative">
                 <button onClick={onClose} className="absolute right-1 top-5.5 text-gray-600 cursor-pointer hover:text-red-600">
                     <X size={22} />
                 </button>

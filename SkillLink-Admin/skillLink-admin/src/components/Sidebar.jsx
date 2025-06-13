@@ -1,6 +1,9 @@
 import { FaBars, FaTachometerAlt } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+import { BiCategory } from "react-icons/bi";
 import { Link } from "react-router-dom";
+import { MdCategory } from "react-icons/md";
+import { GiSkills } from "react-icons/gi";
 import clsx from "clsx";
 
 const Sidebar = ({ open, setOpen, isMobile }) => {
@@ -43,7 +46,7 @@ const Sidebar = ({ open, setOpen, isMobile }) => {
                     <Link
                         to="/"
                         className="flex items-center gap-4 p-4 hover:bg-blue-800"
-                        onClick={() => isMobile && setOpen(false)}
+                        onClick={() => setOpen(false)}
                     >
                         <FaTachometerAlt />
                         {open && <span>Dashboard</span>}
@@ -51,15 +54,30 @@ const Sidebar = ({ open, setOpen, isMobile }) => {
                     <Link
                         to="/Category"
                         className="flex items-center gap-4 p-4 hover:bg-blue-800"
-                        onClick={() => isMobile && setOpen(false)}
+                        onClick={() => setOpen(false)}
                     >
-                        <FaTachometerAlt />
+                        <BiCategory />
                         {open && <span>Categories</span>}
                     </Link>
-                    {/* Başqa linklər buraya */}
+                    <Link
+                        to="/SubCategory"
+                        className="flex items-center gap-4 p-4 hover:bg-blue-800"
+                        onClick={() => setOpen(false)}
+                    >
+                        <MdCategory />
+                        {open && <span>SubCategories</span>}
+                    </Link>
+                    <Link
+                        to="/Specialization"
+                        className="flex items-center gap-4 p-4 hover:bg-blue-800"
+                        onClick={() => setOpen(false)}
+                    >
+                        <GiSkills />
+                        {open && <span>Specialization</span>}
+                    </Link>
                 </nav>
 
-                {/* İstəsən aşağıda logout və s. */}
+
             </div>
 
             {/* Overlay */}

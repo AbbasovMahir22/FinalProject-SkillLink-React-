@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import PostCard from "../components/Posts/PostCard";
 import axios from "axios";
 import Loader from '../components/Loader';
+import { HubConnectionBuilder } from "@microsoft/signalr";
 
 function Explore() {
   const [posts, setPosts] = useState([]);
@@ -13,12 +14,33 @@ function Explore() {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+  const [mediaType, setMediaType] = useState("");
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
+  useEffect(() => {
+    const connection = new HubConnectionBuilder()
+      .withUrl(`${apiUrl}/postHub`, {
+        accessTokenFactory: () => token
+      })
+      .withAutomaticReconnect()
+      .build();
 
+    connection.start().then(() => {
+      console.log("SignalR connected for Explore page");
+
+      connection.on("PostDeleted", (postId) => {
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+      });
+    });
+
+    return () => {
+      connection.stop();
+    };
+  }, [])
   const getExplorePosts = async (pageToFetch, reset = false) => {
     if (loading || (!hasMore && !reset)) return;
     setLoading(true);
+
 
     try {
       const params = {
@@ -28,7 +50,7 @@ function Explore() {
       if (category) params.category = category;
       if (subCategory) params.subCategory = subCategory;
       if (search) params.search = search;
-
+      if (mediaType) params.mediaType = mediaType;
       const response = await axios.get(`${apiUrl}/Post/ExplorePosts`, {
         params,
         headers: {
@@ -103,7 +125,7 @@ function Explore() {
     setPage(1);
     setHasMore(true);
     getExplorePosts(1, true);
-  }, [category, subCategory, search]);
+  }, [category, subCategory, search, mediaType]);
 
   useEffect(() => {
     if (page === 1) return;
@@ -165,6 +187,15 @@ function Explore() {
                 {sub.name}
               </option>
             ))}
+          </select>
+          <select
+            value={mediaType}
+            onChange={(e) => setMediaType(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 pr-8 rounded-lg border border-gray-300 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200"
+          >
+            <option value="">All Media</option>
+            <option value="video">Only Video</option>
+            <option value="image">Only Image</option>
           </select>
         </div>
       </div>

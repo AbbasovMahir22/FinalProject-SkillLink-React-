@@ -1,38 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-
-const categoriesData = [
-  { name: "Frontend", posts: 120 },
-  { name: "Backend", posts: 95 },
-  { name: "UI/UX", posts: 80 },
-  { name: "Mobile", posts: 65 },
-  { name: "DevOps", posts: 50 },
-  { name: "Data Science", posts: 40 },
-  { name: "Security", posts: 35 },
-  { name: "Testing", posts: 30 },
-  { name: "Cloud", posts: 25 },
-  { name: "AI/ML", posts: 20 },
-  { name: "Blockchain", posts: 15 },
-  { name: "Game Dev", posts: 10 },
-  { name: "AR/VR", posts: 8 },
-  { name: "Big Data", posts: 7 },
-  { name: "Automation", posts: 5 },
-  { name: "Other1", posts: 4 },
-  { name: "Other2", posts: 3 },
-  { name: "Other3", posts: 3 },
-  { name: "Other4", posts: 2 },
-  { name: "Other5", posts: 1 },
-  { name: "Other6", posts: 1 },
-  { name: "Other7", posts: 1 },
-  { name: "Other8", posts: 1 },
-  { name: "Other9", posts: 1 },
-  { name: "Other10", posts: 1 },
-  { name: "Other11", posts: 1 },
-  { name: "Other12", posts: 1 },
-  { name: "Other13", posts: 1 },
-  { name: "Other14", posts: 1 },
-  { name: "Other15", posts: 1 },
-];
+import axios from "axios";
+import Spinner from "../Spinner";
 
 const prepareChartData = (data) => {
   const sorted = [...data].sort((a, b) => b.posts - a.posts);
@@ -45,11 +14,34 @@ const prepareChartData = (data) => {
 };
 
 const CategoryChart = () => {
-  const chartData = prepareChartData(categoriesData);
+  const [loading, setLoading] = useState(false);
+  const [datas, setDatas] = useState([]);
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const token = sessionStorage.getItem("token");
+  useEffect(() => {
+    const getDatas = async () => {
+      setLoading(true);
+      const res = await axios.get(`${apiUrl}/AdminAccount/GetPostCountByCategory`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      setDatas(res.data.$values.map(item => ({
+        name: item.category,
+        posts: item.postCount
+      })))
+      setLoading(false);
+
+    }
+    getDatas();
+  }, [])
+  const chartData = prepareChartData(datas);
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-md">
-      <h3 className="text-xl font-bold mb-4">📚 Kateqoriyalara görə paylaşım sayı (Top 10 + Digərləri)</h3>
+      {loading ? <Spinner /> : ""}
+      <h3 className="text-xl font-bold mb-4">Number of post shares by category (Top 10 + Others)</h3>
       <ResponsiveContainer width="100%" height={350}>
         <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 60 }}>
           <CartesianGrid strokeDasharray="3 3" />

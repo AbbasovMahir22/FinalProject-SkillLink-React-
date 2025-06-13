@@ -106,7 +106,7 @@ const PostCard = ({ post, isMyProfile = false }) => {
                             });
                             window.location.reload();
                         }}
-                        className="absolute top-12 right-3 cursor-pointer bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-xs rounded shadow-md z-10"
+                        className="absolute top-12 right-3 cursor-pointer bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-xs rounded shadow-md z-5"
                     >
                         <MdDelete size={20} />
                     </button>

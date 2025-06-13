@@ -5,6 +5,8 @@ import { startConnection, stopConnection } from '../signalR';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { useEffect } from 'react';
+import SignalRListener from '../components/Notification/SignalRListener';
+import { Toaster } from "react-hot-toast";
 
 const MySwal = withReactContent(Swal);
 
@@ -55,6 +57,8 @@ function MainLayout() {
 
     return (
         <div className="min-h-screen flex flex-col relative">
+            <Toaster position="top-center" />
+            <SignalRListener />
             <Navbar />
             <main
                 className="flex-grow px-6 bg-gray-50"

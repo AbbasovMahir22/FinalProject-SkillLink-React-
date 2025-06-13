@@ -18,9 +18,11 @@ import ResetPassword from './pages/ResetPassword';
 
 
 
+
 function App() {
 
   return (
+
     <Router>
       <Routes>
         <Route path="/login" element={<Authentication />} />
@@ -47,6 +49,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+
   );
 }
 

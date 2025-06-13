@@ -1,42 +1,32 @@
 import React from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import Spinner from "../Spinner";
 
-const posts = [
-    {
-        id: 1,
-        title: "React ilə Dashboard yaratmaq",
-        author: "Elvin",
-        date: "2025-06-08",
-    },
-    {
-        id: 2,
-        title: "Backend üçün REST API dizaynı",
-        author: "Aysel",
-        date: "2025-06-07",
-    },
-    {
-        id: 3,
-        title: "UI/UX dizayn trendleri 2025",
-        author: "Samir",
-        date: "2025-06-06",
-    },
-    {
-        id: 4,
-        title: "SignalR ilə real-time chat",
-        author: "Leyla",
-        date: "2025-06-05",
-    },
-    {
-        id: 5,
-        title: "Entity Framework Core optimizasiyası",
-        author: "Rashad",
-        date: "2025-06-04",
-    },
-];
+
 
 const RecentPosts = () => {
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const token = sessionStorage.getItem("token");
+    useEffect(() => {
+        const getRecentPosts = async () => {
+            setLoading(true);
+            const res = await axios.get(`${apiUrl}/AdminAccount/GetRecentPosts`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            setPosts(res.data.$values);
+            setLoading(false);
+        }
+        getRecentPosts();
+    }, [])
     return (
         <div className="bg-white p-6 rounded-2xl shadow-md max-w-full">
-            <h3 className="text-xl font-bold mb-4">📝 Son Paylaşımlar</h3>
+            {loading ? <Spinner /> : ""}
+            <h3 className="text-xl font-bold mb-4">Recent Posts</h3>
             <ul>
                 {posts.map((post) => (
                     <li
@@ -45,8 +35,8 @@ const RecentPosts = () => {
                     >
                         <h4 className="font-semibold text-blue-600">{post.title}</h4>
                         <p className="text-sm text-gray-600">
-                            Müəllif: <span className="font-medium">{post.author}</span> | Tarix:{" "}
-                            {new Date(post.date).toLocaleDateString()}
+                            Owner: <span className="font-medium">{post.fullName}</span> | Date:{" "}
+                            {post.createdDate}
                         </p>
                     </li>
                 ))}

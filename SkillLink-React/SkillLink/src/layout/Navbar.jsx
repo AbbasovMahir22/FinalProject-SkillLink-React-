@@ -126,7 +126,7 @@ const Navbar = () => {
                 <div className="hidden lg:flex items-center gap-6 relative min-w-0">
                     <div className="text-sm text-gray-500 text-right truncate max-w-[150px]">
                         <div className="text-gray-800 font-bold truncate">{user.fullName}</div>
-                        <div className="text-xs truncate">{user.specialization}</div>
+                        <div className="text-xs truncate">{user.email}</div>
                     </div>
 
                     <button onClick={toggleProfile} className="relative flex-shrink-0" title="Profile">

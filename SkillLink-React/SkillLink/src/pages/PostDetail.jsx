@@ -57,7 +57,7 @@ const PostDetail = () => {
         return text?.split(urlRegex).map((part, index) => {
             if (part.match(urlRegex)) {
                 const url = new URL(part);
-                const displayText = url.hostname.includes("chatgpt.com") ? "ChatGPT.com" : url.hostname.replace("www.", "");
+                const displayText = url.hostname.replace("www.", ""); 
 
                 return (
                     <a
@@ -74,6 +74,7 @@ const PostDetail = () => {
             return <span key={index}>{part}</span>;
         });
     }
+
     useEffect(() => {
         if (connection) {
             connection.start()

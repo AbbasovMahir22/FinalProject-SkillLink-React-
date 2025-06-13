@@ -25,10 +25,10 @@ const LikerModal = ({ postId, isOpen, onClose }) => {
 
     return (
         <Dialog open={isOpen} onClose={onClose}>
-            <div className="fixed inset-0   bg-opacity-50 backdrop-blur-xs flex justify-center items-center">
+            <div className="fixed inset-0   bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-10">
                 <Dialog.Panel className=" p-6 rounded-lg  bg-yellow-100 shadow-lg w-96">
                     <button onClick={onClose} className="text-black hover:text-gray-700 text-xl absolute top-4 right-4"></button>
-                    <h2 className="text-lg font-semibold mb-4">Liked by</h2>
+                    <h2 className="text-lg font-semibold mb-4">Liked by: {likes.length}</h2>
                     <div className="space-y-4  h-[230px] px-0.5 overflow-y-auto overflow-x-hidden">
                         {likes.length > 0 ? likes.map(like => (
                             <Link key={like.userId} to={`/userDetail/${like.userId}`}>

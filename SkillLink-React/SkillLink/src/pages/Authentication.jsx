@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -26,11 +26,12 @@ function Authentication() {
         confirmPassword: ''
     });
     const [forgotEmail, setForgotEmail] = useState("");
-
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
-
+    useEffect(() => {
+        localStorage.removeItem("token");
+    }, [])
     const changeForm = () => {
         setIsLogin(!isLogin);
         setIsForgotPassword(false);
@@ -70,8 +71,8 @@ function Authentication() {
         }
     };
 
-    const hasAdminRole = (payload) => {
-        if (!payload) return false;
+    const getRolesFromToken = (payload) => {
+        if (!payload) return [];
 
         const possibleRoleClaims = [
             "role",
@@ -79,35 +80,36 @@ function Authentication() {
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ];
 
-        let roles = [];
-
         for (const claimName of possibleRoleClaims) {
             if (payload[claimName]) {
-                roles = payload[claimName];
-                break;
+                return Array.isArray(payload[claimName])
+                    ? payload[claimName]
+                    : [payload[claimName]];
             }
         }
 
-        const rolesArray = Array.isArray(roles) ? roles : [roles];
-
-        return rolesArray.includes("Admin");
+        return [];
     };
 
     const redirectUser = (token, hasSpecialization) => {
         const payload = decodeToken(token);
-        const isAdmin = hasAdminRole(payload);
+        const roles = getRolesFromToken(payload);
 
-        if (!hasSpecialization && !isAdmin) {
+        const isOnlyMember = roles.length === 1 && roles[0] === "Member";
+        const isAdminOrOther = roles.includes("Admin") || roles.includes("SuperAdmin");
+
+        if (!hasSpecialization && isOnlyMember) {
             setShowModal(true);
             return;
         }
 
-        if (isAdmin) {
+        if (isAdminOrOther) {
             window.location.href = `http://localhost:5173?token=${token}`;
         } else {
             navigate("/");
         }
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -162,7 +164,9 @@ function Authentication() {
     };
 
     return (
+
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-cyan-600 to-orange-400 text-white">
+
             <SpecializationModal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
@@ -171,7 +175,8 @@ function Authentication() {
                     navigate('/');
                 }}
             />
-            <div className="opacity-90 border bg-cyan-900 backdrop-blur-md scale-110 rounded-xl p-8 w-full max-w-md">
+            <div className="opacity-90 border bg-cyan-900 backdrop-blur-md rounded-xl p-6 sm:p-8 w-full max-w-md mx-4 sm:scale-110">
+
                 <h1 className='text-center text-4xl font-bold mb-2.5'>
                     <span className="text-sky-500">Skill</span>
                     <span className="text-orange-500">Link</span>
@@ -310,8 +315,20 @@ function Authentication() {
                     </form>
                 )}
 
-                <ToastContainer />
             </div>
+            <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+            />
+
         </div>
     );
 }
