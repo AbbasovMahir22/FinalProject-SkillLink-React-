@@ -56,6 +56,8 @@ const SubCategory = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
+
+
             const fetchedData = res.data.$values || res.data;
 
             if (reset) {
@@ -140,13 +142,13 @@ const SubCategory = () => {
             </button>
 
             <div className="overflow-x-auto max-w-full">
-                <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-                    <thead className="bg-gray-100">
+                <table className="w-full table-fixed bg-white shadow-md rounded-lg overflow-hidden text-xs md:text-sm">
+                    <thead className="bg-gray-100 whitespace-nowrap">
                         <tr>
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 min-w-0">ID</th>
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 min-w-0">Name</th>
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 min-w-0">Category</th>
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 min-w-0">Actions</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-left font-medium text-gray-700 min-w-[40px]">ID</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-left font-medium text-gray-700 min-w-[100px]">Name</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-left font-medium text-gray-700 min-w-[120px] hidden sm:table-cell">Category</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-right font-medium text-gray-700 min-w-[80px]">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -158,19 +160,21 @@ const SubCategory = () => {
                                     ref={isLast ? lastElementRef : null}
                                     className="border-b hover:bg-gray-50"
                                 >
-                                    <td className="px-6 py-4 min-w-0 break-words">{sub.id}</td>
-                                    <td className="px-6 py-4 min-w-0 break-words">{sub.name}</td>
-                                    <td className="px-6 py-4 min-w-0 break-words">{sub.categoryName}</td>
-                                    <td className="px-6 py-4 min-w-0 break-words flex justify-end gap-3">
+                                    <td className="px-2 md:px-6 py-2 md:py-4 min-w-0 break-words">{sub.id}</td>
+                                    <td className="px-2 md:px-6 py-2 md:py-4 min-w-0 break-words max-w-[150px] md:max-w-none">{sub.name}</td>
+                                    <td className="px-2 md:px-6 py-2 md:py-4 min-w-0 break-words max-w-[120px] hidden sm:table-cell">{sub.categoryName}</td>
+                                    <td className="px-2 md:px-6 py-2 md:py-4 min-w-0 break-words flex justify-end gap-3">
                                         <button
                                             className="text-blue-500 hover:text-blue-700 cursor-pointer"
                                             onClick={() => openUpdateModal(sub)}
+                                            aria-label="Edit"
                                         >
                                             <FaEdit />
                                         </button>
                                         <button
                                             className="text-red-500 hover:text-red-700 cursor-pointer"
                                             onClick={() => handleDelete(sub.id)}
+                                            aria-label="Delete"
                                         >
                                             <FaTrash />
                                         </button>

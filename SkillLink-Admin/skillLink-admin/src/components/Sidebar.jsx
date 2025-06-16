@@ -1,13 +1,22 @@
 import { FaBars, FaTachometerAlt } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { BiCategory } from "react-icons/bi";
-import { Link } from "react-router-dom";
-import { MdCategory } from "react-icons/md";
+import { MdCategory, MdWarning } from "react-icons/md";
 import { GiSkills } from "react-icons/gi";
+import { Link } from "react-router-dom";
 import clsx from "clsx";
+import { NavLink } from "react-router-dom";
+import { LogOut, User2Icon, ClipboardList } from "lucide-react";
+import { ImWarning } from "react-icons/im";
 
 const Sidebar = ({ open, setOpen, isMobile }) => {
+    const navClass = ({ isActive }) =>
+        clsx(
+            "flex items-center gap-4 p-4 hover:bg-yellow-500 transition-colors",
+            isActive && "bg-red-700 text-white"
+        );
     return (
+
         <>
             {isMobile && !open && (
                 <button
@@ -32,7 +41,9 @@ const Sidebar = ({ open, setOpen, isMobile }) => {
                 )}
             >
                 <div className="flex items-center justify-between p-4 border-b border-blue-800">
-                    <h1 className={clsx("text-xl font-bold", !open && "hidden")}>SkillLink</h1>
+                    <Link to='/'>
+                        <h1 className={clsx("text-xl font-bold", !open && "hidden")}>SkillLink</h1>
+                    </Link>
                     <button
                         onClick={() => setOpen(!open)}
                         aria-label={open ? "Close menu" : "Open menu"}
@@ -43,48 +54,76 @@ const Sidebar = ({ open, setOpen, isMobile }) => {
                 </div>
 
                 <nav className="mt-6 flex flex-col flex-grow">
-                    <Link
+                    <NavLink
                         to="/"
-                        className="flex items-center gap-4 p-4 hover:bg-blue-800"
+                        className={navClass}
                         onClick={() => setOpen(false)}
                     >
                         <FaTachometerAlt />
                         {open && <span>Dashboard</span>}
-                    </Link>
-                    <Link
+                    </NavLink>
+                    <NavLink
                         to="/Category"
-                        className="flex items-center gap-4 p-4 hover:bg-blue-800"
+                        className={navClass}
                         onClick={() => setOpen(false)}
                     >
                         <BiCategory />
                         {open && <span>Categories</span>}
-                    </Link>
-                    <Link
+                    </NavLink>
+                    <NavLink
                         to="/SubCategory"
-                        className="flex items-center gap-4 p-4 hover:bg-blue-800"
+                        className={navClass}
                         onClick={() => setOpen(false)}
                     >
                         <MdCategory />
                         {open && <span>SubCategories</span>}
-                    </Link>
-                    <Link
+                    </NavLink>
+                    <NavLink
                         to="/Specialization"
-                        className="flex items-center gap-4 p-4 hover:bg-blue-800"
+                        className={navClass}
                         onClick={() => setOpen(false)}
                     >
                         <GiSkills />
                         {open && <span>Specialization</span>}
-                    </Link>
+                    </NavLink>
+                    <NavLink
+                        to="/Users"
+                        className={navClass}
+                        onClick={() => setOpen(false)}
+                    >
+                        <User2Icon size={18} />
+                        {open && <span>Users</span>}
+                    </NavLink>
+                    <NavLink
+                        to="/Log"
+                        className={navClass}
+                        onClick={() => setOpen(false)}
+                    >
+                        <ClipboardList size={18} />
+                        {open && <span>Logs</span>}
+                    </NavLink>
+                    <NavLink
+                        to="/Report"
+                        className={navClass}
+                        onClick={() => setOpen(false)}
+                    >
+                        <ImWarning size={18} />
+                        {open && <span>Reports</span>}
+                    </NavLink>
                 </nav>
-
-
+                <button
+                    className="text-center font-extrabold cursor-pointer flex items-center gap-4 p-4 bg-yellow-600 text-white rounded hover:bg-red-500"
+                    onClick={() => { sessionStorage.removeItem("token"); window.location.href = "http://localhost:5173/login"; }}
+                >
+                    <LogOut />
+                    {open && <span> Logout</span>}
+                </button>
             </div>
 
-            {/* Overlay */}
             {isMobile && open && (
                 <div
                     onClick={() => setOpen(false)}
-                    className="fixed inset-0 bg-black opacity-50 z-30"
+                    className="fixed top-0 inset-0 bg-black opacity-50 z-30"
                 ></div>
             )}
         </>

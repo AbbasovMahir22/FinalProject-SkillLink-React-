@@ -2,8 +2,9 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import UserListModal from "./UserListModal";
-
-
+import ReportModal from "../Posts/ReportModal";
+import { MdWarning } from "react-icons/md";
+import toast from "react-hot-toast";
 const UserInfo = ({ userInfo }) => {
     const [isFollow, setIsFollow] = useState();
     const token = localStorage.getItem("token");
@@ -11,6 +12,8 @@ const UserInfo = ({ userInfo }) => {
     const [showModal, setShowModal] = useState(false);
     const [modalUsers, setModalUsers] = useState([]);
     const [followCount, setFollowCount] = useState();
+    const [reportLoading, setReportLoading] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
     const apiUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
@@ -54,8 +57,38 @@ const UserInfo = ({ userInfo }) => {
             console.error(`Error fetching ${type}:`, err);
         }
     };
+    const submitReport = async ({ reason, note }) => {
+        setReportLoading(true);
+        try {
+            await axios.post(`${apiUrl}/UserReport/Create`,
+                {
+                    ReportedUserId: userInfo.id,
+                    Reason: reason,
+                    Note: note,
+                    TargetType: "User",
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            toast.success("Report send successfully");
+            setShowReportModal(false);
+            setReportLoading(false);
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.detail);
+            setReportLoading(false);
+        }
+    };
     return (
-        <div className="bg-amber-50 rounded-2xl shadow p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-amber-50 rounded-2xl shadow p-6 flex relative flex-col md:flex-row items-center justify-between gap-6">
+            <button
+                onClick={() => setShowReportModal(true)}
+                className="text-sm cursor-pointer absolute top-0 right-3 text-red-600 mt-2 hover:text-red-800"
+            >
+                <MdWarning size={20} />
+
+            </button>
             <div className="flex items-center gap-4 w-full md:w-auto">
                 {userInfo.imageUrl ? (
                     <img
@@ -68,12 +101,13 @@ const UserInfo = ({ userInfo }) => {
                     <FaUserCircle className="cursor-pointer w-24 h-24" />
                 )}
                 <div className="sm:text-start  md:text-left">
-                    <div className=" sm:block md:block lg:flex gap-3   items-start">
+                    <div className=" sm:block md:block lg:flex gap-3 items-start">
                         <div>
                             <h2 className="text-[12px] sm:text-[18px] md:text-[15px] lg:text-2xl  font-bold text-gray-800 ">{userInfo.fullName}</h2>
 
                             <p className="text-gray-600 text-[13px] sm:text-[15px]">{userInfo.specialization}</p>
                         </div>
+
                         {isFollow ? (
 
                             <button onClick={followOrUnFollow} className="text-white mt-1.5 w-auto md;w-[100px] transiation duration-300 bg-red-600 hover:bg-red-500 px-3 text-[12px] md:text-[15px]  rounded-lg cursor-pointer">Unfollow</button>
@@ -81,6 +115,9 @@ const UserInfo = ({ userInfo }) => {
 
                             <button onClick={followOrUnFollow} className="text-white w-auto md:w-[100px] text-[12px] md:text-[20px] transiation duration-300 bg-blue-600 hover:bg-blue-500 px-3  rounded-lg cursor-pointer">Follow</button>
                         )}
+
+
+
                     </div>
 
                 </div>
@@ -108,6 +145,13 @@ const UserInfo = ({ userInfo }) => {
                     onUserClick={() => setShowModal(false)}
                 />
             )}
+            <ReportModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                onSubmit={submitReport}
+                loading={reportLoading}
+                type={"user"}
+            />
         </div>
     );
 };

@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Swal from 'sweetalert2';
 import { toast, ToastContainer } from 'react-toastify';
 import { ClipLoader } from 'react-spinners';
 import 'react-toastify/dist/ReactToastify.css';
 import SpecializationModal from '../components/Auth/SpecializationModal';
+import { useNavigate } from 'react-router-dom';
 
 function Authentication() {
     const apiUrl = import.meta.env.VITE_API_URL;
-    const navigate = useNavigate();
-
+    const navigate=useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -26,12 +25,15 @@ function Authentication() {
         confirmPassword: ''
     });
     const [forgotEmail, setForgotEmail] = useState("");
+
+    useEffect(() => {
+        localStorage.removeItem("token");
+    }, []);
+
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
-    useEffect(() => {
-        localStorage.removeItem("token");
-    }, [])
+
     const changeForm = () => {
         setIsLogin(!isLogin);
         setIsForgotPassword(false);
@@ -45,6 +47,24 @@ function Authentication() {
         });
     };
 
+    const isMember = (token) => {
+        try {
+            const [, payload] = token.split(".");
+            const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+            const roles =
+                json.role ??
+                json.roles ??
+                json["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ??
+                [];
+
+            return (Array.isArray(roles) ? roles : [roles])
+                .map((r) => r.toLowerCase())
+                .includes("member");
+        } catch {
+            return false;
+        }
+    };
+
     const handleForgotPassword = async (e) => {
         e.preventDefault();
         try {
@@ -56,60 +76,6 @@ function Authentication() {
             Swal.fire("Error", "Something went wrong. Please try again later.", "error");
         }
     };
-
-    const decodeToken = (token) => {
-        if (!token) return null;
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
-                `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`
-            ).join(''));
-            return JSON.parse(jsonPayload);
-        } catch {
-            return null;
-        }
-    };
-
-    const getRolesFromToken = (payload) => {
-        if (!payload) return [];
-
-        const possibleRoleClaims = [
-            "role",
-            "roles",
-            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-        ];
-
-        for (const claimName of possibleRoleClaims) {
-            if (payload[claimName]) {
-                return Array.isArray(payload[claimName])
-                    ? payload[claimName]
-                    : [payload[claimName]];
-            }
-        }
-
-        return [];
-    };
-
-    const redirectUser = (token, hasSpecialization) => {
-        const payload = decodeToken(token);
-        const roles = getRolesFromToken(payload);
-
-        const isOnlyMember = roles.length === 1 && roles[0] === "Member";
-        const isAdminOrOther = roles.includes("Admin") || roles.includes("SuperAdmin");
-
-        if (!hasSpecialization && isOnlyMember) {
-            setShowModal(true);
-            return;
-        }
-
-        if (isAdminOrOther) {
-            window.location.href = `http://localhost:5173?token=${token}`;
-        } else {
-            navigate("/");
-        }
-    };
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -129,12 +95,15 @@ function Authentication() {
                     return;
                 }
 
-                const { token, hasSpecialization } = data;
-                localStorage.setItem('token', token);
+                if (!isMember(data.token)) {
+                    toast.error("User not found");
+                    setLoading(false);
+                    return;
+                }
 
-                redirectUser(token, hasSpecialization);
-
+                localStorage.setItem('token', data.token);
                 setLoading(false);
+                navigate('/');
             } else {
                 if (form.password !== form.confirmPassword) {
                     setMessage("Confirm password is wrong");
@@ -164,19 +133,15 @@ function Authentication() {
     };
 
     return (
-
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-cyan-600 to-orange-400 text-white">
-
             <SpecializationModal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
                 onSaved={() => {
                     setShowModal(false);
-                    navigate('/');
                 }}
             />
             <div className="opacity-90 border bg-cyan-900 backdrop-blur-md rounded-xl p-6 sm:p-8 w-full max-w-md mx-4 sm:scale-110">
-
                 <h1 className='text-center text-4xl font-bold mb-2.5'>
                     <span className="text-sky-500">Skill</span>
                     <span className="text-orange-500">Link</span>
@@ -314,8 +279,8 @@ function Authentication() {
                         </button>
                     </form>
                 )}
-
             </div>
+
             <ToastContainer
                 position="top-center"
                 autoClose={3000}
@@ -328,7 +293,6 @@ function Authentication() {
                 pauseOnHover
                 theme="colored"
             />
-
         </div>
     );
 }

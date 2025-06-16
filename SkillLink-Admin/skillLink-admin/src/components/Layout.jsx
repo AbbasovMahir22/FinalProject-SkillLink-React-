@@ -3,7 +3,7 @@ import Sidebar from "./Sidebar";
 import { FaAngleDoubleUp } from "react-icons/fa";
 import axios from "axios";
 const Layout = ({ children }) => {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -56,7 +56,7 @@ const Layout = ({ children }) => {
                 <div className={`flex flex-col flex-grow transition-all duration-300
                     ${isMobile ? "ml-0" : open ? "ml-64" : "ml-16"}`}>
 
-                    <header className="bg-white shadow p-4 flex justify-between items-center">
+                    <header className="bg-white xl:sticky xl:top-0 shadow p-4 flex justify-between items-center xl:z-50">
                         <div className=" block sm:flex sm:items-center">
                             <img className="ml-6 w-[50px] h-[50px] rounded-full" src={user.imageUrl} />
                             <div className="font-bold ml-6">
@@ -64,12 +64,7 @@ const Layout = ({ children }) => {
                                 <span className="text-[14px] text-gray-500">{user.email}</span>
                             </div>
                         </div>
-                        <button
-                            className="px-4 py-2 cursor-pointer bg-red-600 text-white rounded hover:bg-red-500"
-                            onClick={() => { sessionStorage.removeItem("token"); window.location.href = "http://localhost:5174/login"; }}
-                        >
-                            Logout
-                        </button>
+                      
                     </header>
 
                     <main className="flex-grow p-6 bg-gray-100">

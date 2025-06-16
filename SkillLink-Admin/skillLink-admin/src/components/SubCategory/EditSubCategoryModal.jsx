@@ -22,8 +22,9 @@ const EditSubCategoryModal = ({ subCategory, categories, onClose, onUpdated }) =
         }
 
         try {
+            debugger
             const res = await axios.put(
-                `${apiUrl}/SubCategory/Update/${subCategory.id}`,
+                `${apiUrl}/Admin/SubCategory/Update/${subCategory.id}`,
                 {
                     id: subCategory.id,
                     categoryId,
@@ -36,7 +37,7 @@ const EditSubCategoryModal = ({ subCategory, categories, onClose, onUpdated }) =
             toast.success("SubCategory updated successfully");
             onUpdated(res.data);
             console.log(res.data);
-            
+
             onClose();
         } catch (err) {
             toast.error(err.response?.data?.detail || "Update failed");

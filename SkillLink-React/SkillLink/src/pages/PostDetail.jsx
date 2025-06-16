@@ -9,13 +9,15 @@ import Swal from 'sweetalert2';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { getUserIdFromToken } from '../components/User/GetUserIdFromToken';
 import { FaUserCircle } from "react-icons/fa";
-
-
-
+import { ToastContainer, toast } from "react-toastify";
+import { MdWarning } from "react-icons/md";
+import ReportModal from "../components/Posts/ReportModal";
 
 const PostDetail = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const { id } = useParams();
+    const token = localStorage.getItem("token");
+
     const location = useLocation();
     const [data, setData] = useState({});
     const [comments, setComments] = useState([]);
@@ -26,6 +28,8 @@ const PostDetail = () => {
     const [commentId, setCommentId] = useState();
     const [likeCount, setLikeCount] = useState();
     const commentScroll = useRef();
+    const [reportLoading, setReportLoading] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
 
     useEffect(() => {
         const container = commentScroll.current;
@@ -57,7 +61,7 @@ const PostDetail = () => {
         return text?.split(urlRegex).map((part, index) => {
             if (part.match(urlRegex)) {
                 const url = new URL(part);
-                const displayText = url.hostname.replace("www.", ""); 
+                const displayText = url.hostname.replace("www.", "");
 
                 return (
                     <a
@@ -115,17 +119,28 @@ const PostDetail = () => {
         }
     }, [connection, id]);
     const getPost = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            const res = await axios.get(`${apiUrl}/Post/GetPostFullData/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setData(res.data);
 
-        setLoading(true);
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`${apiUrl}/Post/GetPostFullData/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        setData(res.data);
-        setIsLiked(res.data.isLiked);
-        setComments(res.data.commenters?.$values || []);
-        setLoading(false);
-        setLikeCount(res.data.likeCount);
+            setIsLiked(res.data.isLiked);
+            setComments(res.data.commenters?.$values || []);
+            setLoading(false);
+            setLikeCount(res.data.likeCount);
+        } catch (err) {
+            Swal.fire({
+                title: "Sorry",
+                text: err.response.data.detail,
+                icon: "error",
+            }).then(() => {
+                window.history.back();
+            });
+        }
+
 
 
     };
@@ -202,7 +217,6 @@ const PostDetail = () => {
         setComments(prev => prev.filter(comment => comment.id !== commentId))
     }
     const likePost = async (id) => {
-        const token = localStorage.getItem("token");
         if (isLiked) {
             await axios.delete(`${apiUrl}/Like/DeletePostLike/${id}`, {
                 headers: {
@@ -224,16 +238,42 @@ const PostDetail = () => {
 
     }
 
+    const submitReport = async ({ reason, note }) => {
+        setReportLoading(true);
+        try {
+            await axios.post(`${apiUrl}/UserReport/Create`,
+                {
+                    ReportedUserId: data.userId,
+                    Reason: reason,
+                    Note: note,
+                    RelatedPostId: data.id.toString(),
+                    TargetType: "Post",
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            toast.success("Report send successfully");
+            setShowReportModal(false);
+            setReportLoading(false);
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.detail);
+            setReportLoading(false);
+        }
+    };
+
     return (
         <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
+            <ToastContainer />
             {loading && <Loader />}
 
 
             <div className="flex-1 space-y-6 pr-2">
                 <div className="flex items-center gap-4 border-b pb-2">
-                    <Link to="/">
+                    <button onClick={() => window.history.back()} >
                         <IoArrowBackOutline className="w-[20px] h-[20px] cursor-pointer transition duration-300 hover:scale-110 hover:text-red-700" />
-                    </Link>
+                    </button>
                     {data.userImg ? (
                         <img
                             src={data.userImg}
@@ -244,11 +284,22 @@ const PostDetail = () => {
                         <FaUserCircle className="w-12 h-12 border shadow-sm rounded-full" />
 
                     )}
-                    <div>
-                        <Link to={`/userDetail/${data.userId}`}>
-                            <h4 className="font-semibold cursor-pointer hover:text-amber-700 text-lg">{data.userName}</h4>
-                        </Link>
-                        <p className="text-sm text-gray-500">{data.createdDate}</p>
+                    <div className=" flex items-center justify-between w-full pr-3">
+                        <div>
+                            <Link to={`/userDetail/${data.userId}`}>
+                                <h4 className="font-semibold cursor-pointer hover:text-amber-700 text-lg">{data.userName}</h4>
+                            </Link>
+                            <p className="text-sm text-gray-500">{data.createdDate}</p>
+                        </div>
+                        {!data.isMine && (
+                            <button
+                                onClick={() => setShowReportModal(true)}
+                                className="text-sm cursor-pointer text-red-600 hover:text-red-800"
+                            >
+                                <MdWarning size={18} />
+
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -329,7 +380,13 @@ const PostDetail = () => {
                     )}
                 </div>
             </div>
-
+            <ReportModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                onSubmit={submitReport}
+                loading={reportLoading}
+                type={"post"}
+            />
         </div>
     );
 

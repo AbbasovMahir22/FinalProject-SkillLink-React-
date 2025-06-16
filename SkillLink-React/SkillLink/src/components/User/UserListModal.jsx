@@ -43,18 +43,21 @@ const UserListModal = ({ title, users, onClose, onUserClick }) => {
         }
     };
     return (
-        <div className="fixed inset-0 backdrop-blur-xs  bg-opacity-40 flex justify-center items-center z-50">
-            <div className="bg-yellow-50  realative max-h-72 overflow-y-auto  rounded-xl shadow-lg p-6 w-full max-w-md relative">
-                <button onClick={onClose} className="absolute right-1 top-5.5 text-gray-600 cursor-pointer hover:text-red-600">
-                    <X size={22} />
-                </button>
-                <h2 className="text-xl font-semibold mb-4 ">{title}</h2>
+        <div className="fixed inset-0 backdrop-blur-xs  bg-opacity-40 flex justify-center items-center z-50 ">
+            <div className="bg-yellow-50  realative max-h-[500px] overflow-y-scroll rounded-xl shadow-lg p-6 w-full max-w-md relative">
+
                 {users.length > 0 && (
                     <div >
-                        <div className="sticky -top-6 p-2 bg-yellow-50">
+                        <div className="sticky -top-6 p-2 bg-yellow-100">
                             <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} type="text" className="w-full border p-2  bg-gray-100 rounded" />
+                            <div className="flex items-center justify-between relative ">
+                                <button onClick={onClose} className="absolute  -right-8 -top-11  text-gray-600 cursor-pointer hover:text-red-600">
+                                    <X size={22} />
+                                </button>
+                                <h2 className="text-xl w-full flex items-center justify-between font-semibold mb-4 "><span>{title }:</span> <span>{users.length}</span></h2>
+                            </div>
                         </div>
-                        <div className="space-y-3 max-h-[300px] ">
+                        <div className="space-y-3 max-h-[300px]  ">
                             {searchUser.map((user, i) => (
                                 <div key={i} className="flex items-center  justify-between gap-3 duration-300 cursor-pointer p-2 hover:bg-amber-200">
                                     <div className="flex items-center gap-3  ">

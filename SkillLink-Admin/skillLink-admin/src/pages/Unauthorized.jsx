@@ -1,10 +1,14 @@
-const Unauthorized = () => {
+import Unauthorized from '../../public/what-is-a-401-error.png'
+const UnauthorizedPage = () => {
     return (
-        <div style={{ padding: 20 }}>
-            <h2>Access Denied</h2>
-            <p>You do not have permission to view this page.</p>
-        </div>
+
+        <img
+            src={Unauthorized}
+            alt="Access Denied"
+            className="object-contain min-w-screen max-h-screen"
+        />
+
     );
 };
 
-export default Unauthorized;
+export default UnauthorizedPage;

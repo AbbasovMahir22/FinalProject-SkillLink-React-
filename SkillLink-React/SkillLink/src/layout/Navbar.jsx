@@ -87,38 +87,38 @@ const Navbar = () => {
                 <div className="hidden lg:flex items-center gap-10 text-gray-700 font-medium tracking-wide">
                     <Link
                         to="/"
-                        className={`flex items-center gap-2 ${currentPath === "/" ? "text-blue-600 font-bold" : "text-gray-700"
-                            } hover:text-blue-600`}
+                        className={`flex items-center duration-300 hover:translate-y-1.5 text-blue-600 gap-2 ${currentPath === "/" ? "translate-y-1.5 " : "text-blue-600"
+                            }`}
                         title="Home"
                     >
-                        <FaHome className="text-3xl" />
+                        <FaHome className="text-3xl  text-blue-500" />
                         <span className="text-lg">Home</span>
                     </Link>
                     <Link
                         to="/explore"
-                        className={`flex items-center gap-2 ${currentPath === "/explore" ? "text-cyan-600 font-bold" : "text-gray-700"
-                            } hover:text-blue-600`}
+                        className={`flex items-center  duration-300 hover:translate-y-1.5 text-cyan-500 gap-2 ${currentPath === "/explore" ? "translate-y-1.5 " : "text-cyan-500"
+                            } `}
                         title="Explore"
                     >
-                        <FaCompass className="text-3xl" />
+                        <FaCompass className="text-3xl text-cyan-500" />
                         <span className="text-lg">Explore</span>
                     </Link>
                     <Link
                         to="/messages"
-                        className={`flex items-center gap-2 ${currentPath === "/messages" ? "text-green-600 font-bold" : "text-gray-700"
-                            } hover:text-blue-600`}
+                        className={`flex items-center duration-300 hover:translate-y-1.5 text-green-500  gap-2 ${currentPath === "/messages" ? "translate-y-1.5 " : " text-green-500 "
+                            }`}
                         title="Messages"
                     >
-                        <FaEnvelope className="text-3xl" />
+                        <FaEnvelope className="text-3xl text-green-500" />
                         <span className="text-lg">Messages</span>
                     </Link>
                     <Link
                         to="/notifications"
-                        className={`flex items-center gap-2 ${currentPath === "/notifications" ? "text-yellow-600 font-bold" : "text-gray-700"
-                            } hover:text-blue-600`}
+                        className={`flex items-center duration-300 hover:translate-y-1.5 text-red-500  gap-2 ${currentPath === "/notifications" ? " translate-y-1.5" : "text-red-500 "
+                            } `}
                         title="Notifications"
                     >
-                        <FaBell className="text-3xl" />
+                        <FaBell className="text-3xl tex-red-500" />
                         <span className="text-lg">Notifications</span>
                     </Link>
                 </div>
@@ -192,34 +192,42 @@ const Navbar = () => {
 
             {menuOpen && (
                 <div className="lg:hidden bg-yellow-50 px-4 pb-4 space-y-4 rounded-b shadow-lg">
-                    <Link onClick={() => setMenuOpen(false)} to="/" className="flex items-center gap-3 text-gray-700 transition-all duration-300 hover:text-2xl hover:text-blue-600  text-lg font-semibold">
-                        <FaHome className="text-blue-600 text-2xl" />
+                    <Link onClick={() => setMenuOpen(false)} to="/" className="flex items-center gap-3 text-blue-700 transition-all duration-300 hover:text-2xl hover:text-blue-600  text-lg font-semibold">
+                        <FaHome className=" text-2xl" />
                         Home
                     </Link>
-                    <Link onClick={() => setMenuOpen(false)} to="/explore" className="flex transition-all duration-300 hover:text-2xl  items-center gap-3 text-gray-700 hover:text-blue-600 text-lg font-semibold">
-                        <FaCompass className="text-blue-600 text-2xl" />
+                    <Link onClick={() => setMenuOpen(false)} to="/explore" className="flex transition-all duration-300   items-center gap-3 text-cyan-700  text-lg font-semibold">
+                        <FaCompass className=" text-2xl" />
                         Explore
                     </Link>
-                    <Link onClick={() => setMenuOpen(false)} to="/messages" className="flex transition-all duration-300 hover:text-2xl  items-center gap-3 text-gray-700 hover:text-blue-600 text-lg font-semibold">
-                        <FaEnvelope className="text-blue-600 text-2xl" />
+                    <Link onClick={() => setMenuOpen(false)} to="/messages" className="flex transition-all duration-300   items-center gap-3 text-green-700 text-lg font-semibold">
+                        <FaEnvelope className=" text-2xl" />
                         Messages
                     </Link>
-                    <Link onClick={() => setMenuOpen(false)} to="/notifications" className="flex transition-all duration-300 hover:text-2xl  items-center gap-3 text-gray-700 hover:text-blue-600 text-lg font-semibold">
-                        <FaBell className="text-blue-600 text-2xl" />
+                    <Link onClick={() => setMenuOpen(false)} to="/notifications" className="flex transition-all duration-300   items-center gap-3 text-red-600  text-lg font-semibold">
+                        <FaBell className=" text-2xl" />
                         Notifications
                     </Link>
 
-                    <Link onClick={() => setMenuOpen(false)} to="/myprofile" className="text-gray-700 transition-all duration-300 hover:text-2xl  font-semibold hover:text-blue-600 flex items-center gap-2">
-                        <FaUserCircle className="text-blue-600 text-2xl" />
+                    <Link onClick={() => setMenuOpen(false)} to="/myprofile" className="text-yellow-700 transition-all duration-300 text-lg  font-semibold flex items-center gap-2">
+                        {user.imageUrl ? (
+                            <img
+                                src={user.imageUrl}
+                                alt="Profile"
+                                className="w-[30px] h-[30px] rounded-full object-cover border border-gray-300 shadow-md cursor-pointer"
+                            />
+                        ) : (
+                            <FaUserCircle className="cursor-pointer w-[30px] h-[30px]" />
+                        )}
                         My Profile
                     </Link>
-                    <Link onClick={() => setMenuOpen(false)} to="/settings" className="text-gray-700 transition-all duration-300 hover:text-2xl  font-semibold hover:text-blue-600 flex items-center gap-2">
-                        <FaCog className="text-blue-600 text-2xl" />
+                    <Link onClick={() => setMenuOpen(false)} to="/settings" className="text-purple-700 transition-all duration-300 text-2xl  font-semibold hover:text-blue-600 flex items-center gap-2">
+                        <FaCog className=" text-2xl" />
                         Settings
                     </Link>
                     <button
                         onClick={logout}
-                        className="w-full cursor-pointer transition-all duration-300 hover:translate-x-2.5   text-left px-4 py-2 text-gray-700 font-bold hover:bg-amber-100 flex items-center gap-2"
+                        className="w-full cursor-pointer transition-all duration-300   text-left px-4 py-2 text-red-700 font-bold  flex text-lg items-center gap-2"
                     >
                         <FaSignOutAlt /> Logout
                     </button>

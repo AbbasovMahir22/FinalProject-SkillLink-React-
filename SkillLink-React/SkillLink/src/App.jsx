@@ -14,6 +14,8 @@ import MyProfile from './pages/MyProfile';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import ResetPassword from './pages/ResetPassword';
+import Unauthorized from './pages/Unauthorized';
+import Forbidden from './pages/Forbidden';
 
 
 
@@ -28,6 +30,9 @@ function App() {
         <Route path="/login" element={<Authentication />} />
         <Route path="/confirm-email" element={<EmailConfirm />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/Unauthorized" element={<Unauthorized />} />
+        <Route path="/Forbidden" element={<Forbidden />} />
+
         <Route
           path="/"
           element={

@@ -145,15 +145,15 @@ const Category = () => {
             </div>
 
             <div className="overflow-x-auto max-w-full">
-                <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-                    <thead className="bg-gray-100">
+                <table className="w-full table-fixed bg-white shadow-md rounded-lg overflow-hidden text-xs md:text-sm">
+                    <thead className="bg-gray-100 whitespace-nowrap">
                         <tr>
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">ID</th>
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Name</th>
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">SubCategories</th>
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Posts</th>
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Created</th>
-                            <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">Actions</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-left font-medium text-gray-700">ID</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-left font-medium text-gray-700">Name</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-left font-medium text-gray-700 hidden sm:table-cell">SubCategories</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-left font-medium text-gray-700 hidden md:table-cell">Posts</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-left font-medium text-gray-700 hidden lg:table-cell">Created</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-right font-medium text-gray-700">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -165,12 +165,12 @@ const Category = () => {
                                     ref={isLast ? lastElementRef : null}
                                     className="border-b hover:bg-gray-50"
                                 >
-                                    <td className="px-6 py-4">{cat.id}</td>
-                                    <td className="px-6 py-4">{cat.name}</td>
-                                    <td className="px-6 py-4">{cat.subCategoryCount}</td>
-                                    <td className="px-6 py-4">{cat.postCount}</td>
-                                    <td className="px-6 py-4">{cat.createdDate}</td>
-                                    <td className="px-6 py-4 flex justify-end gap-3">
+                                    <td className="px-2 md:px-6 py-2 md:py-4">{cat.id}</td>
+                                    <td className="px-2 md:px-6 py-2 md:py-4 break-words max-w-[120px] md:max-w-none">{cat.name}</td>
+                                    <td className="px-2 md:px-6 py-2 md:py-4 hidden sm:table-cell">{cat.subCategoryCount}</td>
+                                    <td className="px-2 md:px-6 py-2 md:py-4 hidden md:table-cell">{cat.postCount}</td>
+                                    <td className="px-2 md:px-6 py-2 md:py-4 hidden lg:table-cell">{cat.createdDate}</td>
+                                    <td className="px-2 md:px-6 py-2 md:py-4 flex justify-end gap-3">
                                         <FaEdit
                                             className="cursor-pointer text-blue-500 hover:text-blue-700"
                                             onClick={() => handleEdit(cat.id)}
@@ -187,6 +187,7 @@ const Category = () => {
                 </table>
                 {loading && <Spinner />}
             </div>
+
 
             {showAddModal && (
                 <AddCategoryModal
