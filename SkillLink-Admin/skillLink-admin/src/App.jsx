@@ -72,7 +72,7 @@ function App() {
             </AdminPrivateRoute>
           }
         />
-           <Route
+        <Route
           path="/PostDetail/:id"
           element={
             <AdminPrivateRoute>
@@ -128,6 +128,16 @@ function App() {
             <AdminPrivateRoute>
               <Layout>
                 <LogPage />
+              </Layout>
+            </AdminPrivateRoute>
+          }
+        />
+        <Route
+          path="/PostDetail/:id"
+          element={
+            <AdminPrivateRoute>
+              <Layout>
+                <PostDetail />
               </Layout>
             </AdminPrivateRoute>
           }

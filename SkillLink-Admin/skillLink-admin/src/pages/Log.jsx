@@ -46,6 +46,7 @@ const LogPage = () => {
             setPage(prev => prev + 1);
         } catch (error) {
             console.error("Error fetching logs:", error);
+            setHasMore(false);
         }
     };
 

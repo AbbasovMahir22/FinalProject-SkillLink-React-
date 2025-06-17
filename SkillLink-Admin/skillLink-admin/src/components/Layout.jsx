@@ -13,7 +13,7 @@ const Layout = ({ children }) => {
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
-            if (window.innerWidth >= 768) setOpen(true);
+            if (window.innerWidth >= 768) setOpen(false);
         };
         const getMyData = async () => {
             const res = await axios.get(`${apiUrl}/AdminAccount/ManagementUserInfo`, {
