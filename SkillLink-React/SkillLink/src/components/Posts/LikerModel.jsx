@@ -35,7 +35,7 @@ const LikerModal = ({ postId, isOpen, onClose }) => {
 
                                 <div className="flex hover:bg-gray-200 mt-3 items-center border-b rounded-xs transiation duration-300  space-x-3">
                                     <img
-                                        src={like.userImage}
+                                        src={like.userImage || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgYYED46R5puH88P1qic_RXu3sSoyfjyO3Pw&s"}
                                         alt={like.userName}
                                         className="w-10 h-10 rounded-full"
                                     />

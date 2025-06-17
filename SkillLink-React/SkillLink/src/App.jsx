@@ -9,14 +9,14 @@ import PrivateRoute from './components/PrivateRoute';
 import PostDetail from './pages/PostDetail';
 import UserDetail from './pages/UserDetail';
 import EmailConfirm from './pages/EmailConfirm';
-import Settings from './pages/Settings';
 import MyProfile from './pages/MyProfile';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import ResetPassword from './pages/ResetPassword';
 import Unauthorized from './pages/Unauthorized';
 import Forbidden from './pages/Forbidden';
-
+import About from './pages/About';
+import Contact from './pages/Contact';
 
 
 
@@ -32,7 +32,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/Unauthorized" element={<Unauthorized />} />
         <Route path="/Forbidden" element={<Forbidden />} />
-
+        <Route path="Contact" element={<Contact />} />
         <Route
           path="/"
           element={
@@ -47,10 +47,12 @@ function App() {
           <Route path="messages" element={<Messages />} />
           <Route path="postdetail/:id" element={<PostDetail />} />
           <Route path="userdetail/:id" element={<UserDetail />} />
-          <Route path="settings" element={<Settings />} />
           <Route path="myProfile" element={<MyProfile />} />
           <Route path="terms" element={<Terms />} />
           <Route path="privacy" element={<Privacy />} />
+          <Route path="About" element={<About />} />
+
+
         </Route>
       </Routes>
     </Router>

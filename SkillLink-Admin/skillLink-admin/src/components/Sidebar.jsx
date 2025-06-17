@@ -1,20 +1,25 @@
 import { FaBars, FaTachometerAlt } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { BiCategory } from "react-icons/bi";
-import { MdCategory, MdWarning } from "react-icons/md";
+import { MdCategory } from "react-icons/md";
 import { GiSkills } from "react-icons/gi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { NavLink } from "react-router-dom";
 import { LogOut, User2Icon, ClipboardList } from "lucide-react";
 import { ImWarning } from "react-icons/im";
 
 const Sidebar = ({ open, setOpen, isMobile }) => {
+    const navigate = useNavigate();
     const navClass = ({ isActive }) =>
         clsx(
             "flex items-center gap-4 p-4 hover:bg-yellow-500 transition-colors",
             isActive && "bg-red-700 text-white"
         );
+    const logout = () => {
+        sessionStorage.removeItem("token");
+        navigate('/login');
+    }
     return (
 
         <>
@@ -113,7 +118,7 @@ const Sidebar = ({ open, setOpen, isMobile }) => {
                 </nav>
                 <button
                     className="text-center font-extrabold cursor-pointer flex items-center gap-4 p-4 bg-yellow-600 text-white rounded hover:bg-red-500"
-                    onClick={() => { sessionStorage.removeItem("token"); window.location.href = "http://localhost:5173/login"; }}
+                    onClick={logout}
                 >
                     <LogOut />
                     {open && <span> Logout</span>}

@@ -4,12 +4,27 @@ import { useParams, useLocation } from "react-router-dom";
 const staticPost = {
     id: "p1001",
     title: "Frontend və UI dizayn prinsipləri",
-    mediaType: "image", // "video" da ola bilər
-    mediaUrl: "https://via.placeholder.com/800x400.png?text=Sample+Post+Image",
+    mediaType: "video", // "video" da ola bilər
+    mediaUrl: "https://skill-link-1999.s3.amazonaws.com/41259e7c-73bb-466f-a79a-e56cafd5d4f1.mp4",
     description: `Bu postda frontend interfeyslərinin necə tərtib olunması müzakirə olunur.\nResponsivlik, istifadəçi təcrübəsi və performans əsas mövzulardır.`,
 };
 
 const staticComments = [
+    {
+        id: "c1",
+        content: "Çox faydalı məlumatdır, təşəkkürlər!",
+        user: { fullName: "Elvin Məmmədov" },
+    },
+    {
+        id: "c2",
+        content: "Video əlavə etsəydiniz daha yaxşı olardı.",
+        user: { fullName: "Aysel Həsənova" },
+    },
+    {
+        id: "c3",
+        content: "Burada qeyd olunan UX qaydaları çox köhnədir.",
+        user: { fullName: "Rauf Quliyev" },
+    },
     {
         id: "c1",
         content: "Çox faydalı məlumatdır, təşəkkürlər!",
@@ -42,7 +57,7 @@ const PostDetail = () => {
         setComments(staticComments);
     }, []);
 
-    if (!post) return <p className="text-center mt-8 text-red-500">Post tapılmadı.</p>;
+    if (!post) return <p className="text-center mt-8 text-red-500">Post tapilmadi.</p>;
 
     return (
         <div className="max-w-4xl mx-auto p-4 md:p-8">
@@ -68,17 +83,17 @@ const PostDetail = () => {
 
             <h2 className="text-xl font-semibold mb-4">Şərhlər:</h2>
 
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[500px] overflow-y-auto">
                 {comments.length === 0 && (
-                    <p className="text-gray-500">Bu posta heç bir şərh yazılmayıb.</p>
+                    <p className="text-gray-500">Bu posta heç bir şərh yazilmayib.</p>
                 )}
                 {comments.map((comment) => (
                     <div
                         key={comment.id}
                         id={`comment-${comment.id}`}
                         className={`border p-4 rounded-md transition-all duration-300 ${highlightCommentId === comment.id
-                                ? "bg-red-100 border-red-400"
-                                : "bg-white"
+                            ? "bg-red-100 border-red-400"
+                            : "bg-white"
                             }`}
                     >
                         <p className="text-sm text-gray-800 whitespace-pre-line">{comment.content}</p>

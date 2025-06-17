@@ -14,6 +14,9 @@ export default function UserDetail() {
     const [loading, setLoading] = useState(false);
     const [isBanned, setIsBanned] = useState(false);
 
+    // Yeni state ban müddəti seçim üçün modal göstərmək üçün
+    const [showBanOptions, setShowBanOptions] = useState(false);
+
     useEffect(() => {
         const fetchUser = async () => {
             setLoading(true);
@@ -32,18 +35,40 @@ export default function UserDetail() {
         fetchUser();
     }, [id, apiUrl, token]);
 
-    const toggleBan = async () => {
+    const banUser = async (minutes) => {
+        console.log(minutes);
+        
         try {
             await axios.put(
                 `${apiUrl}/AdminAccount/UpdateUserBanned/${id}`,
-                {},
+                { banDuration: minutes },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setIsBanned((prev) => !prev);
-            toast.success(isBanned ? "User un‑banned" : "User banned");
+            setIsBanned(true);
+            toast.success(`User banned for ${minutes} minute(s)`);
         } catch {
-            toast.error("Ban toggle failed");
+            toast.error("Ban failed");
+        } finally {
+            setShowBanOptions(false);
         }
+    };
+
+    const unbanUser = async () => {
+        try {
+            await axios.put(
+                `${apiUrl}/AdminAccount/UpdateUserBanned/${id}`,
+                { banDuration: 0 }, 
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setIsBanned(false);
+            toast.success("User un-banned");
+        } catch {
+            toast.error("Unban failed");
+        }
+    };
+
+    const handleBanClick = () => {
+        setShowBanOptions(true);
     };
 
     if (loading || !user) {
@@ -57,8 +82,7 @@ export default function UserDetail() {
     const roles = user.roles?.$values ?? user.roles ?? [];
 
     return (
-        <div className="max-w-4xl mx-auto mt-10 p-6 bg-cyan-50 rounded-2xl shadow-md border">
-            {/* header */}
+        <div className="max-w-4xl mx-auto mt-10 p-6 bg-cyan-50 rounded-2xl shadow-md border relative">
             <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-500 shadow-md">
                     <img
@@ -73,21 +97,29 @@ export default function UserDetail() {
 
                 <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between gap-4">
-                        <h2 className="text-2xl font-bold text-gray-800 break-words">
-                            {user.fullName}
-                        </h2>
+                        <h2 className="text-2xl font-bold text-gray-800 break-words">{user.fullName}</h2>
 
                         {!user.isMine && (
-                            <button
-                                onClick={toggleBan}
-                                className={`flex items-center gap-2 py-1 px-3 rounded text-white ${isBanned
-                                    ? "bg-red-600 cursor-pointer hover:bg-red-700"
-                                    : "bg-green-600 cursor-pointer hover:bg-green-700"
-                                    }`}
-                            >
-                                {isBanned ? <FaUserSlash /> : <FaShieldAlt />}
-                                {isBanned ? "Unban" : "Ban"}
-                            </button>
+                            <>
+                                {!isBanned && (
+                                    <button
+                                        onClick={handleBanClick}
+                                        className="flex items-center gap-2 py-1 px-3 rounded text-white bg-green-600 cursor-pointer hover:bg-green-700"
+                                    >
+                                        <FaShieldAlt />
+                                        Ban
+                                    </button>
+                                )}
+                                {isBanned && (
+                                    <button
+                                        onClick={unbanUser}
+                                        className="flex items-center gap-2 py-1 px-3 rounded text-white bg-red-600 cursor-pointer hover:bg-red-700"
+                                    >
+                                        <FaUserSlash />
+                                        Unban
+                                    </button>
+                                )}
+                            </>
                         )}
                     </div>
 
@@ -95,24 +127,18 @@ export default function UserDetail() {
                         <span className="font-semibold">Email:</span> {user.email}
                     </p>
                     <p className="text-gray-600">
-                        <span className="font-semibold">Specialization:</span>{" "}
-                        {user.specialization ?? "—"}
+                        <span className="font-semibold">Specialization:</span> {user.specialization ?? "—"}
                     </p>
                     <p className="text-sm text-gray-400 break-words">ID: {user.id}</p>
 
                     <div className="flex flex-wrap items-center gap-2 mt-3">
                         {roles.map((r) => (
-                            <span
-                                key={r}
-                                className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
-                            >
+                            <span key={r} className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
                                 {r}
                             </span>
                         ))}
                         <span
-                            className={`px-3 py-1 text-xs rounded-full ${user.isConfirmed
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
+                            className={`px-3 py-1 text-xs rounded-full ${user.isConfirmed ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                                 }`}
                         >
                             {user.isConfirmed ? "Email Confirmed" : "Email NOT Confirmed"}
@@ -131,6 +157,31 @@ export default function UserDetail() {
                 <Stat label="Sent Messages" value={user.sentMessagesCount} />
                 <Stat label="Received Messages" value={user.receivedMessagesCount} />
             </div>
+
+            {showBanOptions && (
+                <div className="fixed inset-0 backdrop-blur-xs flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-80 shadow-lg">
+                        <h3 className="text-lg font-semibold mb-4">Select ban duration</h3>
+                        <div className="flex flex-col gap-3">
+                            {[1, 3, 5].map((min) => (
+                                <button
+                                    key={min}
+                                    onClick={() => banUser(min)}
+                                    className="py-2 rounded cursor-pointer bg-yellow-500 text-black hover:bg-yellow-700"
+                                >
+                                    {min} minute
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => setShowBanOptions(false)}
+                                className="mt-4 py-2 rounded border cursor-pointer bg-gray-200 border-gray-300 hover:bg-yellow-200"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

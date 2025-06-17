@@ -15,6 +15,7 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
     const token = localStorage.getItem("token");
     const apiUrl = import.meta.env.VITE_API_URL;
 
+    // Post dəyişəndə state-ləri yenilə
     useEffect(() => {
         setTitle(post?.title || "");
         setDesc(post?.desc || "");
@@ -25,6 +26,7 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
         setMediaFile(null);
     }, [post]);
 
+    // Modal açılanda kateqoriyaları yüklə
     useEffect(() => {
         if (!isOpen) return;
 
@@ -44,6 +46,7 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
         fetchCategories();
     }, [isOpen]);
 
+    // categoryId dəyişəndə subcategoryləri yüklə və var olan subCategoryId-ni saxla əgər uyğundursa
     useEffect(() => {
         if (!categoryId) {
             setSubCategories([]);
@@ -58,16 +61,24 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                setSubCategories(response.data.$values);
-                setSubCategoryId("");
+                const subs = response.data.$values;
+                setSubCategories(subs);
+
+                // Əgər mövcud post subCategoryId bu subcategorylərdədirsə saxla, yoxsa sıfırla
+                if (post?.subCategoryId && subs.some(s => s.id === post.subCategoryId)) {
+                    setSubCategoryId(post.subCategoryId);
+                } else {
+                    setSubCategoryId("");
+                }
             } catch (error) {
                 console.error("Failed to fetch subcategories:", error);
                 setSubCategories([]);
+                setSubCategoryId("");
             }
         };
 
         fetchSubCategories();
-    }, [categoryId]);
+    }, [categoryId, post?.subCategoryId]);
 
     if (!isOpen) return null;
 
@@ -98,7 +109,7 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
     };
 
     return ReactDOM.createPortal(
-        <div className="fixed inset-0  bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-opacity-50 backdrop-blur-xs flex justify-center items-center z-50">
             <div className="bg-blue-50 font-bold rounded-lg p-6 w-full max-w-md relative shadow-lg max-h-[90vh] overflow-auto">
                 <button
                     onClick={onClose}
@@ -112,7 +123,6 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <label>
-                        Title:
                         <input
                             type="text"
                             value={title}
@@ -123,7 +133,6 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
                     </label>
 
                     <label>
-                        Description:
                         <textarea
                             value={desc}
                             onChange={(e) => setDesc(e.target.value)}
@@ -134,7 +143,6 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
                     </label>
 
                     <label>
-                        Category:
                         <select
                             value={categoryId}
                             onChange={(e) => setCategoryId(e.target.value)}
@@ -152,7 +160,6 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
                     </label>
 
                     <label>
-                        Sub Category:
                         <select
                             value={subCategoryId}
                             onChange={(e) => setSubCategoryId(e.target.value)}
@@ -171,7 +178,6 @@ const EditPostModal = ({ isOpen, onClose, post, onSave }) => {
                     </label>
 
                     <label>
-                        Media (image or video):
                         <input
                             type="file"
                             accept="image/*,video/*"

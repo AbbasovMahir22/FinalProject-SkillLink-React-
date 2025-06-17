@@ -20,7 +20,6 @@ import PostDetail from "./pages/PostDetail";
 
   if (token) {
     sessionStorage.setItem("token", token);
-    // query string‑i təmizlə
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 })();

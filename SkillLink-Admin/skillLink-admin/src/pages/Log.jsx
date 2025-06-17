@@ -84,7 +84,7 @@ const LogPage = () => {
         if (a === 'deleted') return 'bg-red-600 text-white';;
         if (a === 'created') return 'bg-emerald-600 text-white';
         if (a === 'updated') return 'bg-yellow-500 text-black';
-        if (a === 'banned') return 'bg-gray-300 text-red-600';
+        if (a.includes("banned for")) return 'bg-gray-300 text-red-600';
         if (a === 'unbanned') return 'bg-indigo-600 text-white';
         return 'bg-slate-200 text-slate-800';
     };

@@ -144,12 +144,12 @@ const Navbar = () => {
                     {profileOpen && (
                         <div
                             ref={profileRef}
-                            className="absolute right-0 top-14 bg-white border rounded shadow-md w-48 z-50"
+                            className="absolute right-0 top-14 bg-yellow-200 border rounded shadow-md w-48 z-50"
                         >
                             <Link
                                 onClick={() => setProfileOpen(false)}
                                 to="myProfile"
-                                className=" px-1 py-2 text-gray-700 hover:bg-gray-200 flex items-center gap-2"
+                                className=" px-1  text-gray-700 hover:bg-yellow-300 flex items-center gap-2"
                             >
                                 {user.imageUrl ? (
                                     <img
@@ -161,13 +161,6 @@ const Navbar = () => {
                                     <FaUserCircle className="cursor-pointer w-[46px] h-[46px]" />
                                 )}
                                 My Profile
-                            </Link>
-                            <Link onClick={() => setProfileOpen(false)}
-                                to="/settings"
-                                className="flex gap-2 px-1 py-2 text-gray-700 hover:bg-gray-200"
-                            >
-                                <FaCog className="text-blue-600 text-2xl" />
-                                Settings
                             </Link>
                             <button
                                 onClick={logout}
@@ -220,10 +213,6 @@ const Navbar = () => {
                             <FaUserCircle className="cursor-pointer w-[30px] h-[30px]" />
                         )}
                         My Profile
-                    </Link>
-                    <Link onClick={() => setMenuOpen(false)} to="/settings" className="text-purple-700 transition-all duration-300 text-2xl  font-semibold hover:text-blue-600 flex items-center gap-2">
-                        <FaCog className=" text-2xl" />
-                        Settings
                     </Link>
                     <button
                         onClick={logout}

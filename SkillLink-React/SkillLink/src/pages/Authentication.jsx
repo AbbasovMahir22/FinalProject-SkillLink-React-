@@ -7,10 +7,12 @@ import { ClipLoader } from 'react-spinners';
 import 'react-toastify/dist/ReactToastify.css';
 import SpecializationModal from '../components/Auth/SpecializationModal';
 import { useNavigate } from 'react-router-dom';
+import FakeImage from '../assets/Images/FakeImage.jpg'
+
 
 function Authentication() {
     const apiUrl = import.meta.env.VITE_API_URL;
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -250,6 +252,16 @@ function Authentication() {
                                 className="text-white cursor-pointer font-semibold hover:underline"
                             >
                                 {isLogin ? "Register" : "Login"}
+                            </button>
+                        </p>
+                        <p className="text-center mt-2">
+                            Need help?{' '}
+                            <button
+                                onClick={() => navigate('/contact')}
+                                className="text-sky-400 underline hover:text-sky-600 text-[15px] cursor-pointer font-semibold"
+                                type="button"
+                            >
+                                Contact Us
                             </button>
                         </p>
                     </>

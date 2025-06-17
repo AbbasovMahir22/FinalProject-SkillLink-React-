@@ -35,7 +35,7 @@ const PrivateRoute = ({ children }) => {
 
         return roles.includes("member") ? children : <Navigate to="/unauthorized" replace />;
     } catch (err) {
-        console.error("JWT decode xetasi:", err);
+        console.error("JWT dwcode xetasi:", err);
         return <Navigate to="/unauthorized" replace />;
     }
 };
