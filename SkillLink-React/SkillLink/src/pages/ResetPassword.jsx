@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';  // react-icons importu
 
 function ResetPassword() {
     const [form, setForm] = useState({ password: '', confirmPassword: '' });
     const [email, setEmail] = useState('');
     const [token, setToken] = useState('');
+    const [showPasswords, setShowPasswords] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -26,6 +28,10 @@ function ResetPassword() {
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const toggleShowPasswords = () => {
+        setShowPasswords(prev => !prev);
     };
 
     const handleSubmit = async (e) => {
@@ -56,16 +62,32 @@ function ResetPassword() {
                 className="bg-white text-black p-8 rounded-xl shadow-lg w-full max-w-md"
             >
                 <h2 className="text-2xl font-bold mb-4 text-center">Reset Password</h2>
+
+                <div className="relative mb-4">
+                    <input
+                        type={showPasswords ? "text" : "password"}
+                        name="password"
+                        placeholder="New Password"
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-2 border rounded-md pr-10"
+                    />
+                    <button
+                        type="button"
+                        onClick={toggleShowPasswords}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-900"
+                        aria-label={showPasswords ? "Hide password" : "Show password"}
+                    >
+                        {showPasswords ? (
+                            <AiOutlineEyeInvisible size={24} />
+                        ) : (
+                            <AiOutlineEye size={24} />
+                        )}
+                    </button>
+                </div>
+
                 <input
-                    type="password"
-                    name="password"
-                    placeholder="New Password"
-                    onChange={handleChange}
-                    required
-                    className="w-full mb-4 px-4 py-2 border rounded-md"
-                />
-                <input
-                    type="password"
+                    type={showPasswords ? "text" : "password"}
                     name="confirmPassword"
                     placeholder="Confirm New Password"
                     onChange={handleChange}

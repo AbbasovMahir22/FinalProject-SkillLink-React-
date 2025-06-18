@@ -36,7 +36,6 @@ const SignalRListener = () => {
             }
         });
         setReplace(3);
-        console.log("men signalR");
 
 
         return () => {
