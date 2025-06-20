@@ -98,7 +98,7 @@ const UserInfo = ({ userInfo }) => {
                     />
 
                 ) : (
-                    <FaUserCircle className="cursor-pointer w-24 h-24" />
+                    <FaUserCircle className="cursor-pointer w-24 h-24 rounded-full"  />
                 )}
                 <div className="sm:text-start  md:text-left">
                     <div className=" sm:block md:block lg:flex gap-3 items-start">

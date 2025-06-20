@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import logo from "../assets/Images/SkillLink.png";
 import { useLocation } from "react-router-dom";
-
+import { ShieldCheck, Scale, Info, Mail } from "lucide-react";
 const Navbar = () => {
     const location = useLocation();
     const currentPath = location.pathname;
@@ -144,27 +144,43 @@ const Navbar = () => {
                     {profileOpen && (
                         <div
                             ref={profileRef}
-                            className="absolute right-0 top-14 bg-yellow-200 border rounded shadow-md w-48 z-50"
+                            className="absolute  right-0 top-14 bg-yellow-100 border rounded shadow-md w-48 z-50"
                         >
                             <Link
                                 onClick={() => setProfileOpen(false)}
                                 to="myProfile"
-                                className=" px-1  text-gray-700 hover:bg-yellow-300 flex items-center gap-2"
+                                className="   text-gray-700 hover:bg-yellow-300 flex items-center gap-2"
                             >
                                 {user.imageUrl ? (
                                     <img
                                         src={user.imageUrl}
                                         alt="Profile"
-                                        className="w-[46px] h-[46px] rounded-full object-cover border border-gray-300 shadow-md cursor-pointer"
+                                        className="w-[35px] h-[35px] rounded-full object-cover border border-gray-300 shadow-md cursor-pointer"
                                     />
                                 ) : (
                                     <FaUserCircle className="cursor-pointer w-[46px] h-[46px]" />
                                 )}
                                 My Profile
                             </Link>
+                            <Link onClick={() => setProfileOpen(false)} to="/About" className="flex transition-all duration-300   items-center gap-3 text-gray-500 py-1 px-1 text-lg font-semibold">
+                                <Info className=" text-2xl" />
+                                About
+                            </Link>
+                            <Link onClick={() => setProfileOpen(false)} to="/Privacy" className="flex transition-all duration-300   items-center gap-3 text-green-600  py-1 px-1 text-lg font-semibold">
+                                <ShieldCheck className=" text-2xl " />
+                                Privacy
+                            </Link>
+                            <Link onClick={() => setProfileOpen(false)} to="/Terms" className="flex transition-all duration-300   items-center gap-3 text-yellow-600  py-1 px-1 text-lg font-semibold">
+                                <Scale className=" text-2xl" />
+                                Terms
+                            </Link>
+                            <Link onClick={() => setProfileOpen(false)} to="/Contact" className="flex transition-all duration-300   items-center gap-3 text-indigo-600  py-1 px-1 text-lg font-semibold">
+                                <Mail className=" text-2xl" />
+                                Contact us
+                            </Link>
                             <button
                                 onClick={logout}
-                                className="w-full cursor-pointer text-left px-4 py-2 bg-red-600 text-black font-bold hover:bg-red-500 flex items-center gap-2"
+                                className="w-full cursor-pointer py-1 px-1 text-left  bg-red-600 text-black font-bold hover:bg-red-500 flex items-center gap-2"
                             >
                                 <FaSignOutAlt /> Logout
                             </button>
@@ -189,20 +205,36 @@ const Navbar = () => {
                         <FaHome className=" text-2xl" />
                         Home
                     </Link>
-                    <Link onClick={() => setMenuOpen(false)} to="/explore" className="flex transition-all duration-300   items-center gap-3 text-cyan-700  text-lg font-semibold">
+                    <Link onClick={() => setProfileOpen(false)} to="/explore" className="flex transition-all duration-300   items-center gap-3 text-cyan-700  text-lg font-semibold">
                         <FaCompass className=" text-2xl" />
                         Explore
                     </Link>
-                    <Link onClick={() => setMenuOpen(false)} to="/messages" className="flex transition-all duration-300   items-center gap-3 text-green-700 text-lg font-semibold">
+                    <Link onClick={() => setProfileOpen(false)} to="/messages" className="flex transition-all duration-300   items-center gap-3 text-green-700 text-lg font-semibold">
                         <FaEnvelope className=" text-2xl" />
                         Messages
                     </Link>
-                    <Link onClick={() => setMenuOpen(false)} to="/notifications" className="flex transition-all duration-300   items-center gap-3 text-red-600  text-lg font-semibold">
+                    <Link onClick={() => setProfileOpen(false)} to="/notifications" className="flex transition-all duration-300   items-center gap-3 text-red-600  text-lg font-semibold">
                         <FaBell className=" text-2xl" />
                         Notifications
                     </Link>
+                    <Link onClick={() => setProfileOpen(false)} to="/About" className="flex transition-all duration-300   items-center gap-3 text-gray-500 py-1 px-1 text-lg font-semibold">
+                        <Info className=" text-2xl" />
+                        About
+                    </Link>
+                    <Link onClick={() => setProfileOpen(false)} to="/Privacy" className="flex transition-all duration-300   items-center gap-3 text-green-600  py-1 px-1 text-lg font-semibold">
+                        <ShieldCheck className=" text-2xl " />
+                        Privacy
+                    </Link>
+                    <Link onClick={() => setProfileOpen(false)} to="/Terms" className="flex transition-all duration-300   items-center gap-3 text-yellow-600  py-1 px-1 text-lg font-semibold">
+                        <Scale className=" text-2xl" />
+                        Terms
+                    </Link>
+                    <Link onClick={() => setProfileOpen(false)} to="/Contact" className="flex transition-all duration-300   items-center gap-3 text-indigo-600  py-1 px-1 text-lg font-semibold">
+                        <Mail className=" text-2xl" />
+                        Contact us
+                    </Link>
 
-                    <Link onClick={() => setMenuOpen(false)} to="/myprofile" className="text-yellow-700 transition-all duration-300 text-lg  font-semibold flex items-center gap-2">
+                    <Link onClick={() => setProfileOpen(false)} to="/myprofile" className="text-yellow-700 transition-all duration-300 text-lg  font-semibold flex items-center gap-2">
                         {user.imageUrl ? (
                             <img
                                 src={user.imageUrl}
@@ -214,6 +246,7 @@ const Navbar = () => {
                         )}
                         My Profile
                     </Link>
+
                     <button
                         onClick={logout}
                         className="w-full cursor-pointer transition-all duration-300   text-left px-4 py-2 text-red-700 font-bold  flex text-lg items-center gap-2"

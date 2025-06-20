@@ -111,13 +111,15 @@ const Category = () => {
         }
     };
 
-    const handleDelete = async id => {
+    const handleDelete = async (id) => {
         try {
             await axios.delete(`${apiUrl}/Admin/Category/Delete/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setCategories(prev => prev.filter(c => c.id !== id));
         } catch (err) {
+            console.log(err);
+            
             toast.error(err.response?.data?.detail || "Delete failed");
         }
     };
@@ -136,7 +138,7 @@ const Category = () => {
                         onChange={e => setSearchCategory(e.target.value)}
                     />
                     <button
-                        className="bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded hover:bg-blue-700"
+                        className="bg-blue-600 cursor-pointer text-white flex items-center gap-2 px-4 py-2 rounded hover:bg-blue-700"
                         onClick={handleAdd}
                     >
                         <FaPlus /> Add

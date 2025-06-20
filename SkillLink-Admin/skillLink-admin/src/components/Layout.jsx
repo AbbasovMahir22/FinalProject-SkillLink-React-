@@ -60,7 +60,7 @@ const Layout = ({ children }) => {
                         <div className=" block sm:flex sm:items-center">
                             <img className="ml-6 w-[50px] h-[50px] rounded-full" src={user.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}`} />
                             <div className="font-bold ml-6">
-                                <h1 className="text-[15px] sm:text-[15px] lg:text-xl ">{user.fullName}/<span className="text-red-500">{roles.join(",")}</span></h1>
+                                <h1 className="text-[15px] sm:text-[15px] lg:text-xl ">{user.fullName}/<span className="text-red-500">{roles.join("/")}</span></h1>
                                 <span className="text-[14px] text-gray-500">{user.email}</span>
                             </div>
                         </div>

@@ -2,10 +2,12 @@ import axios from "axios";
 import { Loader } from "lucide-react";
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-
+import { IoMdArrowRoundBack } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 export default function Contact() {
     const [formData, setFormData] = useState({ fullName: "", email: "", message: "" });
     const [errors, setErrors] = useState({});
+    const navigate = useNavigate();
     const apiUrl = import.meta.env.VITE_API_URL;
     const [loading, setLoading] = useState(false);
     const handleChange = e => {
@@ -50,11 +52,14 @@ export default function Contact() {
             toast.error("Failed to send message. Please try again later.");
         }
     };
+    const backPreviousPage = () => {
+        window.history.back();
+    }
 
     return (
-        <div className="min-h-screen select-none bg-gradient-to-tr from-orange-400 via-blue-500 to-blue-700 flex flex-col items-center justify-center px-4 py-1 font-sans">
+        <div className="min-h-screen select-none bg-gradient-to-tr   from-orange-400 via-blue-500 to-blue-700 flex flex-col items-center justify-center px-4 py-1 font-sans">
             <Toaster />
-            <h1 className="text-orange-600 text-6xl font-extrabold tracking-widest mb-5 select-none drop-shadow-lg">
+            <h1 className="text-orange-600  text-6xl font-extrabold tracking-widest mb-5 select-none drop-shadow-lg">
                 <span className="text-orange-600">Skill</span><span className="text-cyan-300">Link</span>
             </h1>
 
@@ -149,6 +154,8 @@ export default function Contact() {
                         {loading ? <Loader /> : "Send"}
                     </button>
                 </form>
+                <IoMdArrowRoundBack onClick={backPreviousPage} size={25} className="absolute text-gray-400 duration-300 z-50 cursor-pointer top-5 left-3 hover:text-red-600 hover:-translate-x-1" />
+
             </div>
         </div>
     );

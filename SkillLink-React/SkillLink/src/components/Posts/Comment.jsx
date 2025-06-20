@@ -1,37 +1,39 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { AiFillLike } from "react-icons/ai";
-import { MdDelete, MdEdit } from "react-icons/md";
-import axios from "axios";
-import UserListModal from "../User/UserListModal";
+import { AiFillLike, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { MdDelete, MdEdit, MdWarning } from "react-icons/md";
 import { FaUserCircle } from "react-icons/fa";
-import ReportModal from "./ReportModal";
+import axios from "axios";
 import { toast } from "react-toastify";
-import { MdWarning } from "react-icons/md";
+import UserListModal from "../User/UserListModal";
+import ReportModal from "./ReportModal";
 
-const Comment = ({ comment, commentDelete, handleEdit }) => {
+const Comment = ({ comment, commentDelete, handleEdit, chagedHidden }) => {
     const token = localStorage.getItem("token");
     const commentRef = useRef(null);
+
+
     const [likes, setLikes] = useState(comment.likeCount);
     const [liked, setLiked] = useState(comment.isLiked);
     const [commentLikers, setCommentLikers] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportLoading, setReportLoading] = useState(false);
+    const [hidden, setHidden] = useState(comment.isHidden);
+
+
 
     const apiUrl = import.meta.env.VITE_API_URL;
 
     const openLikers = async (commentId) => {
         try {
-            const likers = await axios.get(`${apiUrl}/Like/GetAllLikerByCommentId/${commentId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const res = await axios.get(`${apiUrl}/Like/GetAllLikerByCommentId/${commentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
-            setCommentLikers(likers.data.$values);
+            setCommentLikers(res.data.$values);
             setShowModal(true);
-        } catch (error) {
-            console.error("Failed to fetch likers", error);
+        } catch (err) {
+            console.error("Failed to fetch likers", err);
         }
     };
 
@@ -42,9 +44,7 @@ const Comment = ({ comment, commentDelete, handleEdit }) => {
                 if (entry.isIntersecting && isTargeted) {
                     const el = commentRef.current;
                     el.classList.add("highlight");
-                    setTimeout(() => {
-                        el.classList.remove("highlight");
-                    }, 1500);
+                    setTimeout(() => el.classList.remove("highlight"), 1500);
                 }
             },
             { threshold: 0.9 }
@@ -62,12 +62,11 @@ const Comment = ({ comment, commentDelete, handleEdit }) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             commentDelete(commentId);
-        } catch (error) {
-            console.error("Delete failed", error);
-            alert("Failed to delete comment.");
+        } catch (err) {
+            console.error("Delete failed", err);
+            toast.error("Failed to delete comment.");
         }
     };
-
     const handleLike = async () => {
         try {
             if (!liked) {
@@ -82,8 +81,8 @@ const Comment = ({ comment, commentDelete, handleEdit }) => {
                 setLikes((prev) => prev - 1);
             }
             setLiked(!liked);
-        } catch (error) {
-            console.error("Like/unlike failed", error);
+        } catch (err) {
+            console.error("Like/unlike failed", err);
             alert("Failed to update like status.");
         }
     };
@@ -100,18 +99,14 @@ const Comment = ({ comment, commentDelete, handleEdit }) => {
                     RelatedPostId: comment.postId.toString(),
                     TargetType: "Comment",
                 },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
-            toast.success("Report send successfully");
+            toast.success("Report sent successfully");
             setShowReportModal(false);
-            setReportLoading(false);
-        } catch (error) {
-            console.error(error);
-            toast.error(error.response?.data?.detail);
-            setReportLoading(false);
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Something went wrong");
         }
+        setReportLoading(false);
     };
 
     return (
@@ -119,7 +114,7 @@ const Comment = ({ comment, commentDelete, handleEdit }) => {
             <div
                 id={`comment-${comment.id}`}
                 ref={commentRef}
-                className="hover:bg-amber-200 transition duration-300 p-2 border-b flex gap-3"
+                className={`${comment.isHidden && !comment.isPostOwner ? "hidden" : ""} hover:bg-amber-200  transition duration-300 p-2 border-b flex gap-3`}
             >
                 {comment.userImg ? (
                     <img src={comment.userImg} alt="avatar" className="w-8 h-8 rounded-full" />
@@ -140,9 +135,7 @@ const Comment = ({ comment, commentDelete, handleEdit }) => {
                     <div className="flex items-center justify-between gap-2 mt-2 text-sm text-gray-600">
                         <button
                             onClick={handleLike}
-                            className={`flex items-center gap-1 ${liked ? "text-blue-600" : "hover:text-blue-500"
-                                }`}
-                            aria-label="Like comment"
+                            className={`flex items-center gap-1 ${liked ? "text-blue-600" : "hover:text-blue-500"}`}
                         >
                             <AiFillLike
                                 size={18}
@@ -154,35 +147,42 @@ const Comment = ({ comment, commentDelete, handleEdit }) => {
                                 onClick={() => openLikers(comment.id)}
                                 onKeyDown={(e) => e.key === "Enter" && openLikers(comment.id)}
                                 className="cursor-pointer select-none"
-                                aria-label="Show likers"
                             >
                                 {likes}
                             </span>
                         </button>
 
-                        {!comment.isMine && (
-                            <button
-                                onClick={() => setShowReportModal(true)}
-                                className="text-sm cursor-pointer text-red-600 hover:text-red-800"
-                            >
-                                <MdWarning size={18} />
 
-                            </button>
-                        )}
+
+                        <div className="flex items-center gap-1" >
+
+                            {comment.isPostOwner && !comment.isMine && (
+                                <button onClick={() => { chagedHidden(comment.id); setHidden(!hidden); }} className="cursor-pointer">
+                                    {hidden ? (
+                                        <AiOutlineEyeInvisible className="text-gray-500 hover:text-gray-700" />
+
+                                    ) : (
+                                        <AiOutlineEye className="text-gray-500 hover:text-gray-700" />
+
+                                    )}
+                                </button>
+                            )}
+                            {!comment.isMine && (
+                                <button
+                                    onClick={() => setShowReportModal(true)}
+                                    className="text-sm cursor-pointer text-red-600 hover:text-red-800"
+                                >
+                                    <MdWarning size={18} />
+                                </button>
+                            )}
+                        </div>
                         {comment.isMine && (
                             <div className="flex gap-0.5">
-                                <button
-                                    onClick={() => handleEdit(comment.id, comment.commentText)}
-                                    className="text-gray-400"
-                                    aria-label="Edit comment"
-                                >
+
+                                <button onClick={() => handleEdit(comment.id, comment.commentText)}>
                                     <MdEdit size={18} className="text-gray-600 cursor-pointer hover:text-red-500" />
                                 </button>
-                                <button
-                                    onClick={() => handleDelete(comment.id)}
-                                    className="text-gray-400"
-                                    aria-label="Delete comment"
-                                >
+                                <button onClick={() => handleDelete(comment.id)}>
                                     <MdDelete size={18} className="text-gray-600 cursor-pointer hover:text-red-500" />
                                 </button>
                             </div>

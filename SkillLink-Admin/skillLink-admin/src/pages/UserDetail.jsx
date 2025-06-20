@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import Spinner from "../components/Spinner";
-import { toast } from "react-toastify";
-import { FaShieldAlt, FaUserSlash } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import { FaShieldAlt, FaUserSlash, FaTimes, FaPlus } from "react-icons/fa";
 
 export default function UserDetail() {
     const { id } = useParams();
@@ -14,8 +14,10 @@ export default function UserDetail() {
     const [loading, setLoading] = useState(false);
     const [isBanned, setIsBanned] = useState(false);
 
-    // Yeni state ban müddəti seçim üçün modal göstərmək üçün
     const [showBanOptions, setShowBanOptions] = useState(false);
+    const [showAddRole, setShowAddRole] = useState(false);
+    const [availableRoles, setAvailableRoles] = useState([]);
+    const [selectedRoleId, setSelectedRoleId] = useState(null);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -27,7 +29,7 @@ export default function UserDetail() {
                 const dto = res.data;
                 setUser(dto);
                 setIsBanned(dto.isBanned);
-            } catch (err) {
+            } catch {
                 toast.error("User could not be loaded");
             }
             setLoading(false);
@@ -35,9 +37,77 @@ export default function UserDetail() {
         fetchUser();
     }, [id, apiUrl, token]);
 
+    const myRoles = user?.myRoles?.$values || [];
+    const isSuperAdmin = myRoles.includes("SuperAdmin");
+
+    const removeRole = async (role) => {
+        if (!isSuperAdmin) {
+            toast.error("You do not have permission to perform this operation..");
+            return;
+        }
+        try {
+            const response = await axios.delete(`${apiUrl}/AdminAccount/DeleteRole`, {
+                headers: { Authorization: `Bearer ${token}` },
+                data: { id, role },
+            });
+            if (response.data.isSuccess) {
+                toast.success(response.data.message);
+                setUser((prev) => ({
+                    ...prev,
+                    roles: {
+                        ...prev.roles,
+                        $values: prev.roles.$values.filter((r) => r !== role),
+                    },
+                }));
+            }
+        } catch (err) {
+            toast.error(err.response?.data || "Failed to remove role");
+        }
+    };
+
+    const addRole = async (role) => {
+        try {
+            const response = await axios.post(
+                `${apiUrl}/AdminAccount/AddRoleToUser/`,
+                { id, role },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.isSuccess) {
+                toast.success(response.data.message);
+                setUser((prev) => ({
+                    ...prev,
+                    roles: {
+                        ...prev.roles,
+                        $values: [...(prev.roles?.$values || []), role],
+                    },
+                }));
+            }
+        } catch (err) {
+            toast.error(err.response?.data || "Failed to add role");
+        } finally {
+            setShowAddRole(false);
+            setSelectedRoleId(null);
+        }
+    };
+
+    const openAddRole = async () => {
+        if (!isSuperAdmin) {
+            toast.error("You do not have permission to perform this operation..");
+            return;
+        }
+        try {
+            const res = await axios.get(`${apiUrl}/AdminAccount/GetRolesForAdd`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setAvailableRoles(res.data.$values);
+            setSelectedRoleId(null);
+            setShowAddRole(true);
+        } catch (err) {
+            toast.error("Could not load roles");
+        }
+    };
+
     const banUser = async (minutes) => {
-        console.log(minutes);
-        
         try {
             await axios.put(
                 `${apiUrl}/AdminAccount/UpdateUserBanned/${id}`,
@@ -57,7 +127,7 @@ export default function UserDetail() {
         try {
             await axios.put(
                 `${apiUrl}/AdminAccount/UpdateUserBanned/${id}`,
-                { banDuration: 0 }, 
+                { banDuration: 0 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setIsBanned(false);
@@ -65,10 +135,6 @@ export default function UserDetail() {
         } catch {
             toast.error("Unban failed");
         }
-    };
-
-    const handleBanClick = () => {
-        setShowBanOptions(true);
     };
 
     if (loading || !user) {
@@ -83,6 +149,7 @@ export default function UserDetail() {
 
     return (
         <div className="max-w-4xl mx-auto mt-10 p-6 bg-cyan-50 rounded-2xl shadow-md border relative">
+            <ToastContainer />
             <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-500 shadow-md">
                     <img
@@ -101,19 +168,18 @@ export default function UserDetail() {
 
                         {!user.isMine && (
                             <>
-                                {!isBanned && (
+                                {!isBanned ? (
                                     <button
-                                        onClick={handleBanClick}
-                                        className="flex items-center gap-2 py-1 px-3 rounded text-white bg-green-600 cursor-pointer hover:bg-green-700"
+                                        onClick={() => setShowBanOptions(true)}
+                                        className="flex items-center cursor-pointer gap-2 py-1 px-3 rounded text-white bg-green-600 hover:bg-green-700"
                                     >
                                         <FaShieldAlt />
                                         Ban
                                     </button>
-                                )}
-                                {isBanned && (
+                                ) : (
                                     <button
                                         onClick={unbanUser}
-                                        className="flex items-center gap-2 py-1 px-3 rounded text-white bg-red-600 cursor-pointer hover:bg-red-700"
+                                        className="flex items-center cursor-pointer gap-2 py-1 px-3 rounded text-white bg-red-600 hover:bg-red-700"
                                     >
                                         <FaUserSlash />
                                         Unban
@@ -132,13 +198,32 @@ export default function UserDetail() {
                     <p className="text-sm text-gray-400 break-words">ID: {user.id}</p>
 
                     <div className="flex flex-wrap items-center gap-2 mt-3">
-                        {roles.map((r) => (
-                            <span key={r} className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                        {roles.map((r, idx) => (
+                            <span
+                                key={idx}
+                                className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full flex items-center gap-1"
+                            >
                                 {r}
+                                {!user.isMine && (
+                                    <FaTimes
+                                        onClick={() => removeRole(r)}
+                                        className="cursor-pointer hover:text-red-600 ml-1"
+                                    />
+                                )}
                             </span>
                         ))}
+                        {!user.isMine && (
+                            <button
+                                onClick={openAddRole}
+                                className="px-2 py-1 text-white cursor-pointer bg-green-600 rounded-full flex items-center text-xs hover:bg-green-700"
+                            >
+                                <FaPlus className="mr-1" /> Add
+                            </button>
+                        )}
                         <span
-                            className={`px-3 py-1 text-xs rounded-full ${user.isConfirmed ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                            className={`px-3 py-1 text-xs rounded-full ${user.isConfirmed
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
                                 }`}
                         >
                             {user.isConfirmed ? "Email Confirmed" : "Email NOT Confirmed"}
@@ -174,9 +259,57 @@ export default function UserDetail() {
                             ))}
                             <button
                                 onClick={() => setShowBanOptions(false)}
-                                className="mt-4 py-2 rounded border cursor-pointer bg-gray-200 border-gray-300 hover:bg-yellow-200"
+                                className="mt-4 py-2 rounded cursor-pointer border bg-gray-200 hover:bg-yellow-200"
                             >
                                 Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showAddRole && (
+                <div className="fixed inset-0 backdrop-blur-xs flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-80 shadow-lg">
+                        <h3 className="text-lg font-semibold mb-4">Select a role to add</h3>
+                        <select
+                            className="w-full border border-gray-300 rounded p-2 mb-4"
+                            value={selectedRoleId || ""}
+                            onChange={(e) => setSelectedRoleId(e.target.value)}
+                        >
+                            <option value="" disabled>
+                                Select role...
+                            </option>
+                            {availableRoles.map((role) => (
+                                <option key={role.id} value={role.id}>
+                                    {role.name}
+                                </option>
+                            ))}
+                        </select>
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowAddRole(false);
+                                    setSelectedRoleId(null);
+                                }}
+                                className="py-2 px-4 cursor-pointer rounded border bg-gray-200 hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                disabled={!selectedRoleId}
+                                onClick={() => {
+                                    const roleToAdd = availableRoles.find((r) => r.id === selectedRoleId);
+                                    if (roleToAdd) addRole(roleToAdd.name);
+                                }}
+                                className={`py-2 px-4 cursor-pointer rounded text-white ${selectedRoleId
+                                    ? "bg-green-600 hover:bg-green-700"
+                                    : "bg-green-300 cursor-not-allowed"
+                                    }`}
+                            >
+                                Add Role
                             </button>
                         </div>
                     </div>
@@ -189,6 +322,6 @@ export default function UserDetail() {
 const Stat = ({ label, value }) => (
     <div className="bg-white p-4 rounded-xl shadow-sm border">
         <p className="text-xl font-bold text-indigo-600">{value}</p>
-        <p className="text-xs md:text-sm text-gray-500 break-words">{label}</p>
+        <p className="text-xs md:text-sm text-gray-500">{label}</p>
     </div>
 );

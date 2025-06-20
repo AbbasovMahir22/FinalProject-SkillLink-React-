@@ -8,9 +8,21 @@ import clsx from "clsx";
 import { NavLink } from "react-router-dom";
 import { LogOut, User2Icon, ClipboardList } from "lucide-react";
 import { ImWarning } from "react-icons/im";
-
+import { jwtDecode } from "jwt-decode";
 const Sidebar = ({ open, setOpen, isMobile }) => {
     const navigate = useNavigate();
+    const token = sessionStorage.getItem("token");
+    let isSuperAdmin = false;
+
+    if (token) {
+        try {
+            const decoded = jwtDecode(token);
+            const roles = decoded.roles || decoded.role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+            isSuperAdmin = roles && roles.some(role => role.toLowerCase() === "superadmin");
+        } catch (error) {
+            console.error("Token decoding error:", error);
+        }
+    }
     const navClass = ({ isActive }) =>
         clsx(
             "flex items-center gap-4 p-4 hover:bg-yellow-500 transition-colors",
@@ -100,8 +112,8 @@ const Sidebar = ({ open, setOpen, isMobile }) => {
                         {open && <span>Users</span>}
                     </NavLink>
                     <NavLink
-                        to="/Log"
-                        className={navClass}
+                        to={isSuperAdmin ? "/Log" : ""}
+                        className={isSuperAdmin ? navClass : "flex text-gray-500 items-center gap-4 p-4 hover:bg-yellow-500 transition-colors"}
                         onClick={() => setOpen(false)}
                     >
                         <ClipboardList size={18} />

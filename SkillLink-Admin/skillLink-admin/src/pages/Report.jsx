@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { Link } from "lucide-react";
 const ReportList = () => {
     const navigate = useNavigate();
     const [filter, setFilter] = useState("All");
@@ -74,12 +74,11 @@ const ReportList = () => {
                             <div
                                 key={report.id}
                                 onClick={() => handleRedirect(report)}
-                                className={`${report.targetType === "Post" && "bg-red-200"
-                                    } rounded-lg shadow-md border p-4 cursor-pointer hover:shadow-lg transition duration-200`}
+                                className="rounded-lg  bg-amber-100 shadow-md border p-4 cursor-pointer hover:shadow-lg transition duration-200"
                             >
                                 <div className="mb-2">
                                     <span className="font-semibold">Type:</span>{" "}
-                                    <span className="capitalize text-blue-700">{report.targetType}</span>
+                                    <span className="capitalize text-red-700">{report.targetType}</span>
                                 </div>
                                 <div className="mb-2">
                                     <span className="font-semibold">Reason:</span> {report.reason}
@@ -91,12 +90,14 @@ const ReportList = () => {
                                 )}
                                 <div className="mb-2 text-sm text-gray-500">
                                     <span className="font-semibold">Reported By:</span>{" "}
-                                    {report.reporterFullName || report.reporterId}
+                                    {report.reporterFullName}
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                    <span className="font-semibold">Reported User:</span>{" "}
-                                    {report.reportedUserFullName || report.reportedUserId}
-                                </div>
+                                <Link to={`/UserDetail/${report.reporterId}`} className="" >
+                                    <div className="text-sm text-gray-500">
+                                        <span className="font-semibold">Reported User:</span>{" "}
+                                        {report.reportedUserFullName}
+                                    </div>
+                                </Link>
                             </div>
                         ))
                     )}

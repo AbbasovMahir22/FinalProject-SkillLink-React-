@@ -91,7 +91,7 @@ export default function AdminLogin() {
                     <button
                         type="button"
                         onClick={() => setShowPass(!showPass)}
-                        className="absolute inset-y-0 right-3 flex items-center text-gray-700 hover:text-orange-500 transition"
+                        className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-700 hover:text-orange-500 transition"
                     >
                         {showPass ? <FaEye /> : <FaEyeSlash />}
                     </button>

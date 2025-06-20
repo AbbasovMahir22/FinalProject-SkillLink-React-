@@ -59,7 +59,7 @@ export default function AddSpecializationModal({ onClose, onCreated }) {
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+                            className="bg-blue-600 cursor-pointer text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
                         >
                             {submitting ? "Saving..." : "Save"}
                         </button>

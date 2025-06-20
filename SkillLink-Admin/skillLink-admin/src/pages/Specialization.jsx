@@ -83,7 +83,8 @@ export default function Specialization() {
 
   const handleCreated = (newItem) => setItems((prev) => [newItem, ...prev]);
   const handleUpdated = (updated) =>
-    setItems((prev) => prev.map((sp) => (sp.id === updated.id ? updated : sp)));
+    
+  setItems((prev) => prev.map((sp) => (sp.id === updated.id ? updated : sp)));
 
   return (
     <div className="p-6 select-none relative">

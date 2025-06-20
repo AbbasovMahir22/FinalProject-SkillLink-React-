@@ -44,6 +44,13 @@ const PostDetail = () => {
     useEffect(() => {
         getPost();
     }, [id]);
+    const toggleVisibility = async (id) => {
+        await axios.put(`${apiUrl}/Comment/HiddenOrUnHidden/${id}`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+    };
     useEffect(() => {
         const token = localStorage.getItem("token");
         const newConnection = new HubConnectionBuilder()
@@ -80,44 +87,54 @@ const PostDetail = () => {
     }
 
     useEffect(() => {
-        if (connection) {
-            connection.start()
-                .then(() => {
-                    connection.invoke("AddToGroup", id);
+        if (!connection || !data.userId) return;
 
-                    connection.on("ReceiveComment", (newComment) => {
-                        const myUserId = getUserIdFromToken();
-                        const updatedComment = {
-                            ...newComment,
-                            isMine: newComment.userId === myUserId
-                        };
+        connection.start()
+            .then(() => {
+                connection.invoke("AddToGroup", id);
 
-                        setComments(prev => [...prev, updatedComment]);
-                    });
+                connection.on("ReceiveComment", (newComment) => {
+                    const myUserId = getUserIdFromToken();
 
-                    connection.on("DeleteComment", (id) => {
-                        setComments(prev => prev.filter(p => p.id != id));
-                    })
-                    connection.on("UpdateComment", (newComment) => {
-                        setComments(prevComments =>
-                            prevComments.map(comment =>
-                                comment.id === newComment.id ? { ...comment, commentText: newComment.text } : comment
-                            )
-                        );
-                        setNewText("");
-                        setIsUpdate(false);
-                    })
-                })
-                .catch(e => console.log("SignalR connection error: ", e));
+                    const updatedComment = {
+                        ...newComment,
+                        isMine: newComment.userId === myUserId,
+                        isPostOwner: newComment.userId !== data.userId
+                    };
 
-            return () => {
-                if (connection.state === "Connected") {
-                    connection.invoke("RemoveFromGroup", id);
-                    connection.stop();
-                }
-            };
-        }
-    }, [connection, id]);
+                    setComments(prev => [...prev, updatedComment]);
+                });
+                connection.on("HiddenOrUnHidden", (msj) => {
+                    setComments(prev =>
+                        prev.map(c =>
+                            c.id === msj.commentId && c.userId !== msj.userId ? { ...c, isHidden: msj.isHidden } : c
+                        )
+                    );
+                });
+
+                connection.on("DeleteComment", (id) => {
+                    setComments(prev => prev.filter(p => p.id != id));
+                });
+
+                connection.on("UpdateComment", (newComment) => {
+                    setComments(prevComments =>
+                        prevComments.map(comment =>
+                            comment.id === newComment.id ? { ...comment, commentText: newComment.text } : comment
+                        )
+                    );
+                    setNewText("");
+                    setIsUpdate(false);
+                });
+            })
+            .catch(e => console.log("SignalR connection error: ", e));
+
+        return () => {
+            if (connection.state === "Connected") {
+                connection.invoke("RemoveFromGroup", id);
+                connection.stop();
+            }
+        };
+    }, [connection, data.userId]);
     const getPost = async () => {
         try {
             setLoading(true);
@@ -338,8 +355,15 @@ const PostDetail = () => {
                 <div ref={commentScroll} className="space-y-4 md:h-[280px] lg:h-[380px] max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
                     {comments.length > 0 ? (
                         comments.map((comment) => (
+
                             <div id={`comment-${comment.id}`} key={comment.id}>
-                                <Comment comment={comment} commentDelete={handleDelete} handleEdit={handleEdit} />
+                                <Comment
+                                    comment={comment}
+                                    commentDelete={handleDelete}
+                                    handleEdit={handleEdit}
+                                    chagedHidden={toggleVisibility}
+
+                                />
                             </div>
                         ))
                     ) : (

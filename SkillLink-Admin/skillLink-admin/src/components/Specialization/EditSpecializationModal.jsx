@@ -28,7 +28,7 @@ export default function EditSpecializationModal({ specialization, onClose, onUpd
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-            onUpdated({ id: specialization.id, name: newName });
+            onUpdated({ id: specialization.id, name: newName, users: specialization.users });
             toast.success("Specialization updated");
             onClose();
         } catch (err) {
@@ -63,7 +63,7 @@ export default function EditSpecializationModal({ specialization, onClose, onUpd
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+                            className="bg-blue-600 cursor-pointer text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
                         >
                             {submitting ? "Saving..." : "Save"}
                         </button>

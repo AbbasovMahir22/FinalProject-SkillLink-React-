@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Category from "./pages/Category";
 import Layout from "./components/Layout";
 import AdminPrivateRoute from "./components/AdminPrivateRoute";
+import SuperAdminPrivateRoute from "./components/SuperAdminPrivateRoute ";
 import UserDetail from "./pages/UserDetail";
 import SubCategory from "./pages/SubCategory";
 import Specialization from "./pages/Specialization";
@@ -125,11 +126,11 @@ function App() {
         <Route
           path="/Log"
           element={
-            <AdminPrivateRoute>
+            <SuperAdminPrivateRoute>
               <Layout>
                 <LogPage />
               </Layout>
-            </AdminPrivateRoute>
+            </SuperAdminPrivateRoute>
           }
         />
         <Route
