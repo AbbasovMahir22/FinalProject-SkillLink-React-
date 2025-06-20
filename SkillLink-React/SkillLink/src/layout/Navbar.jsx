@@ -7,6 +7,7 @@ import axios from "axios";
 import logo from "../assets/Images/SkillLink.png";
 import { useLocation } from "react-router-dom";
 import { ShieldCheck, Scale, Info, Mail } from "lucide-react";
+import { FaHeart } from "react-icons/fa6";
 const Navbar = () => {
     const location = useLocation();
     const currentPath = location.pathname;
@@ -177,6 +178,10 @@ const Navbar = () => {
                             <Link onClick={() => setProfileOpen(false)} to="/Contact" className="flex transition-all duration-300   items-center gap-3 text-indigo-600  py-1 px-1 text-lg font-semibold">
                                 <Mail className=" text-2xl" />
                                 Contact us
+                            </Link>
+                            <Link onClick={() => setProfileOpen(false)} to="/Likes" className="flex transition-all duration-300   items-center gap-3 text-red-600  py-1 px-1 text-lg font-semibold">
+                                <FaHeart className=" text-2xl" />
+                                Likes
                             </Link>
                             <button
                                 onClick={logout}

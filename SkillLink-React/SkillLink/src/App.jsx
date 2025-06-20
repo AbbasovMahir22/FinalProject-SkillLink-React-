@@ -17,6 +17,7 @@ import Unauthorized from './pages/Unauthorized';
 import Forbidden from './pages/Forbidden';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Likes from './pages/Likes';
 
 
 
@@ -51,6 +52,7 @@ function App() {
           <Route path="terms" element={<Terms />} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="About" element={<About />} />
+          <Route path="Likes" element={<Likes />} />
         </Route>
       </Routes>
     </Router>

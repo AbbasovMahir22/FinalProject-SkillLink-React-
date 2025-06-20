@@ -4,20 +4,21 @@ import { useParams } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import { toast, ToastContainer } from "react-toastify";
 import { FaShieldAlt, FaUserSlash, FaTimes, FaPlus } from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
 
 export default function UserDetail() {
     const { id } = useParams();
     const apiUrl = import.meta.env.VITE_API_URL;
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isBanned, setIsBanned] = useState(false);
-
     const [showBanOptions, setShowBanOptions] = useState(false);
     const [showAddRole, setShowAddRole] = useState(false);
     const [availableRoles, setAvailableRoles] = useState([]);
     const [selectedRoleId, setSelectedRoleId] = useState(null);
+    const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -34,15 +35,28 @@ export default function UserDetail() {
             }
             setLoading(false);
         };
-        fetchUser();
-    }, [id, apiUrl, token]);
 
-    const myRoles = user?.myRoles?.$values || [];
-    const isSuperAdmin = myRoles.includes("SuperAdmin");
+        const checkSuperAdmin = () => {
+            try {
+                const decoded = jwtDecode(token);
+                const roles =
+                    decoded?.roles ||
+                    decoded?.role ||
+                    decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+                const isSuper = Array.isArray(roles) ? roles.includes("SuperAdmin") : roles === "SuperAdmin";
+                setIsSuperAdmin(isSuper);
+            } catch {
+                setIsSuperAdmin(false);
+            }
+        };
+
+        fetchUser();
+        checkSuperAdmin();
+    }, [id, apiUrl, token]);
 
     const removeRole = async (role) => {
         if (!isSuperAdmin) {
-            toast.error("You do not have permission to perform this operation..");
+            toast.error("You do not have permission to perform this operation.");
             return;
         }
         try {
@@ -92,7 +106,7 @@ export default function UserDetail() {
 
     const openAddRole = async () => {
         if (!isSuperAdmin) {
-            toast.error("You do not have permission to perform this operation..");
+            toast.error("You do not have permission to perform this operation.");
             return;
         }
         try {
@@ -102,7 +116,7 @@ export default function UserDetail() {
             setAvailableRoles(res.data.$values);
             setSelectedRoleId(null);
             setShowAddRole(true);
-        } catch (err) {
+        } catch {
             toast.error("Could not load roles");
         }
     };

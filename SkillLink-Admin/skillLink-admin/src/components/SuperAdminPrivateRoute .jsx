@@ -23,28 +23,31 @@ const SuperAdminPrivateRoute = ({ children }) => {
                 return;
             }
 
-            const roleClaim =
-                decoded.role ??
-                decoded.roles ??
-                decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+            const rawRoles =
+                decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+                decoded.roles ||
+                decoded.role;
 
-            const roles = (Array.isArray(roleClaim) ? roleClaim : [roleClaim])
+            const roles = (Array.isArray(rawRoles) ? rawRoles : [rawRoles])
                 .filter(Boolean)
-                .map(r => r.toLowerCase());
+                .map(role => role.toLowerCase());
 
-            if (roles.includes("superadmin")) {
+            const isSuperAdmin = roles.includes("superadmin");
+
+            if (isSuperAdmin) {
                 setChecking(false);
-                return;
+            } else {
+                navigate("/forbidden", { replace: true });
             }
-
-            navigate("/forbidden", { replace: true });
         } catch (err) {
-            console.error("Token decode error:", err);
+            console.error("Token decoding xetasi:", err);
             navigate("/unauthorized", { replace: true });
         }
     }, [navigate]);
 
-    if (checking) return <div className="text-center mt-10">Checking...</div>;
+    if (checking) {
+        return <div className="text-center mt-10 text-gray-500">Checking...</div>;
+    }
 
     return children;
 };

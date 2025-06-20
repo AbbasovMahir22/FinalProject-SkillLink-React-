@@ -17,8 +17,8 @@ const PostDetail = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const { id } = useParams();
     const token = localStorage.getItem("token");
-
     const location = useLocation();
+
     const [data, setData] = useState({});
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -27,64 +27,69 @@ const PostDetail = () => {
     const [isUpdate, setIsUpdate] = useState(false);
     const [commentId, setCommentId] = useState();
     const [likeCount, setLikeCount] = useState();
-    const commentScroll = useRef();
     const [reportLoading, setReportLoading] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
+    const [newText, setNewText] = useState("");
 
-    useEffect(() => {
-        const container = commentScroll.current;
-        const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 300;
-        if (isAtBottom) {
-            container.scrollTo({
-                top: container.scrollHeight,
-                behavior: 'smooth'
-            });
-        }
-    }, [comments]);
-    useEffect(() => {
-        getPost();
-    }, [id]);
-    const toggleVisibility = async (id) => {
-        await axios.put(`${apiUrl}/Comment/HiddenOrUnHidden/${id}`, {}, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+    const commentScroll = useRef();
+
+    const formatDescription = (text) => {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text?.split(urlRegex).map((part, index) => (
+            part.match(urlRegex) ? (
+                <a
+                    key={index}
+                    href={part}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                >
+                    {new URL(part).hostname.replace("www.", "")}
+                </a>
+            ) : (
+                <span key={index}>{part}</span>
+            )
+        ));
     };
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+
+    const fetchPost = async () => {
+        try {
+            setLoading(true);
+            const res = await axios.get(`${apiUrl}/Post/GetPostFullData/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setData(res.data);
+            setIsLiked(res.data.isLiked);
+            setComments(res.data.commenters?.$values || []);
+            setLikeCount(res.data.likeCount);
+        } catch (err) {
+            Swal.fire({
+                title: "Sorry",
+                text: err.response?.data?.detail || "Something went wrong",
+                icon: "error",
+            }).then(() => window.history.back());
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const setupSignalR = () => {
         const newConnection = new HubConnectionBuilder()
             .withUrl(`${apiUrl}/commenthub`, {
                 accessTokenFactory: () => token
             })
             .withAutomaticReconnect()
             .build();
-
         setConnection(newConnection);
+    };
+
+    useEffect(() => {
+        fetchPost();
+    }, [id]);
+
+    useEffect(() => {
+        setupSignalR();
     }, []);
-    function formatDescription(text) {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-        return text?.split(urlRegex).map((part, index) => {
-            if (part.match(urlRegex)) {
-                const url = new URL(part);
-                const displayText = url.hostname.replace("www.", "");
-
-                return (
-                    <a
-                        key={index}
-                        href={part}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline hover:text-blue-800"
-                    >
-                        {displayText}
-                    </a>
-                );
-            }
-            return <span key={index}>{part}</span>;
-        });
-    }
 
     useEffect(() => {
         if (!connection || !data.userId) return;
@@ -92,191 +97,130 @@ const PostDetail = () => {
         connection.start()
             .then(() => {
                 connection.invoke("AddToGroup", id);
-                console.log(connection);
 
                 connection.on("ReceiveComment", (newComment) => {
                     const myUserId = getUserIdFromToken();
-
-                    const updatedComment = {
+                    setComments(prev => prev.some(c => c.id === newComment.id) ? prev : [...prev, {
                         ...newComment,
                         isMine: newComment.userId === myUserId,
-                        isPostOwner: newComment.userId !== data.userId
-                    };
-
-                    setComments(prev => [...prev, updatedComment]);
+                        isPostOwner: data.userId === myUserId,
+                    }]);
                 });
-                connection.on("HiddenOrUnHidden", (msj) => {
+
+                connection.on("HiddenOrUnHidden", ({ commentId, isHidden, userId }) => {
                     setComments(prev =>
                         prev.map(c =>
-                            c.id === msj.commentId && c.userId !== msj.userId ? { ...c, isHidden: msj.isHidden } : c
+                            c.id === commentId
+                                ? { ...c, isHidden }
+                                : c
                         )
                     );
                 });
 
-                connection.on("DeleteComment", (id) => {
-                    setComments(prev => prev.filter(p => p.id != id));
+                connection.on("DeleteComment", (commentId) => {
+                    setComments(prev => prev.filter(p => p.id !== commentId));
                 });
 
-                connection.on("UpdateComment", (newComment) => {
-                    setComments(prevComments =>
-                        prevComments.map(comment =>
-                            comment.id === newComment.id ? { ...comment, commentText: newComment.text } : comment
-                        )
-                    );
+                connection.on("UpdateComment", ({ id, text }) => {
+                    setComments(prev => prev.map(c => c.id === id ? { ...c, commentText: text } : c));
                     setNewText("");
                     setIsUpdate(false);
                 });
             })
-            .catch(e => console.log("SignalR connection error: ", e));
+            .catch(e => console.error("SignalR connection error:", e));
 
         return () => {
-            if (connection.state === "Connected") {
-                connection.invoke("RemoveFromGroup", id);
-                connection.stop();
-            }
+            connection?.invoke("RemoveFromGroup", id);
+            connection?.off("ReceiveComment");
+            connection?.off("HiddenOrUnHidden");
+            connection?.off("DeleteComment");
+            connection?.off("UpdateComment");
+            connection?.stop();
         };
     }, [connection, data.userId]);
-    const getPost = async () => {
-        try {
-            setLoading(true);
-            const token = localStorage.getItem("token");
-            const res = await axios.get(`${apiUrl}/Post/GetPostFullData/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setData(res.data);
 
-            setIsLiked(res.data.isLiked);
-            setComments(res.data.commenters?.$values || []);
-            setLoading(false);
-            setLikeCount(res.data.likeCount);
-        } catch (err) {
-            Swal.fire({
-                title: "Sorry",
-                text: err.response.data.detail,
-                icon: "error",
-            }).then(() => {
-                window.history.back();
-            });
+    useEffect(() => {
+        if (commentScroll.current) {
+            const container = commentScroll.current;
+            const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 300;
+            if (isAtBottom) {
+                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+            }
         }
-
-
-
-    };
+    }, [comments]);
 
     useEffect(() => {
         if (location.hash) {
-            const id = location.hash.substring(1);
-            const element = document.getElementById(id);
+            const element = document.getElementById(location.hash.substring(1));
             setTimeout(() => {
-                if (element) {
-                    element.scrollIntoView({ behavior: "smooth", block: "end" });
-                }
+                element?.scrollIntoView({ behavior: "smooth", block: "end" });
             }, 300);
         }
     }, [comments, location]);
 
-    const [newText, setNewText] = useState("");
-
     const addComment = async () => {
-        const token = localStorage.getItem("token");
-
         if (!newText.trim()) {
-            Swal.fire({
-                title: "error!",
-                text: "cannot be empty",
-                icon: "error",
-
-            });
-            return;
+            return Swal.fire({ title: "Error", text: "Comment cannot be empty", icon: "error" });
         }
-
-        const newComment = {
-            postId: id,
-            text: newText
-        };
-
-        await axios.post(`${apiUrl}/Comment/Create`, newComment, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
+        await axios.post(`${apiUrl}/Comment/Create`, { postId: id, text: newText }, {
+            headers: { Authorization: `Bearer ${token}` }
         });
-
         setNewText("");
-
     };
-    const handleEdit = (id, text) => {
-        setCommentId(id);
-        setNewText(text);
-        setIsUpdate(true);
-    }
-    const cancelUpdate = () => {
-        setIsUpdate(false);
-        setNewText("");
-    }
-    const changedComment = {
-        postId: id,
-        newText: newText
 
-    }
     const editComment = async () => {
-        const token = localStorage.getItem("token");
-        await axios.put(`${apiUrl}/Comment/Update/${commentId}`,
-            changedComment,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            })
-    }
+        await axios.put(`${apiUrl}/Comment/Update/${commentId}`, { postId: id, newText }, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+    };
 
-    const handleDelete = async (commentId) => {
-
-        setComments(prev => prev.filter(comment => comment.id !== commentId))
-    }
-    const likePost = async (id) => {
-        if (isLiked) {
-            await axios.delete(`${apiUrl}/Like/DeletePostLike/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            })
-            setIsLiked(!isLiked);
-            setLikeCount(prev => Math.max(0, prev - 1));
+    const toggleVisibility = async (commentId) => {
+        try {
+            await axios.put(`${apiUrl}/Comment/HiddenOrUnHidden/${commentId}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (err) {
+            toast.error(err.response?.data);
         }
-        else {
-            await axios.post(`${apiUrl}/Like/CreatePostLike/${id}`, {}, {
+    };
+
+    const likePost = async (postId) => {
+        const endpoint = isLiked ? 'DeletePostLike' : 'CreatePostLike';
+
+        try {
+            await axios({
+                method: isLiked ? 'delete' : 'post',
+                url: `${apiUrl}/Like/${endpoint}/${postId}`,
                 headers: {
                     Authorization: `Bearer ${token}`,
-                }
-            })
-            setLikeCount(prev => Math.max(0, prev + 1));
-            setIsLiked(!isLiked);
-        }
+                },
+                data: {}
+            });
 
-    }
+            setIsLiked(!isLiked);
+            setLikeCount(prev => isLiked ? Math.max(0, prev - 1) : prev + 1);
+        } catch (error) {
+            console.error("Like emeliyyat zamani xəta:", error);
+        }
+    };
 
     const submitReport = async ({ reason, note }) => {
         setReportLoading(true);
         try {
-            await axios.post(`${apiUrl}/UserReport/Create`,
-                {
-                    ReportedUserId: data.userId,
-                    Reason: reason,
-                    Note: note,
-                    RelatedPostId: data.id.toString(),
-                    TargetType: "Post",
-                },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-            toast.success("Report send successfully");
+            await axios.post(`${apiUrl}/UserReport/Create`, {
+                ReportedUserId: data.userId,
+                Reason: reason,
+                Note: note,
+                RelatedPostId: data.id.toString(),
+                TargetType: "Post"
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success("Report sent successfully");
             setShowReportModal(false);
-            setReportLoading(false);
         } catch (error) {
-            console.error(error);
-            toast.error(error.response?.data?.detail);
+            toast.error(error.response?.data?.detail || "Error submitting report");
+        } finally {
             setReportLoading(false);
         }
     };
@@ -286,54 +230,42 @@ const PostDetail = () => {
             <ToastContainer />
             {loading && <Loader />}
 
-
             <div className="flex-1 space-y-6 pr-2">
+                {/* Header */}
                 <div className="flex items-center gap-4 border-b pb-2">
-                    <button onClick={() => window.history.back()} >
-                        <IoArrowBackOutline className="w-[20px] h-[20px] cursor-pointer transition duration-300 hover:scale-110 hover:text-red-700" />
+                    <button onClick={() => window.history.back()}>
+                        <IoArrowBackOutline className="w-5 h-5 cursor-pointer hover:text-red-700" />
                     </button>
                     {data.userImg ? (
-                        <img
-                            src={data.userImg}
-                            alt="avatar"
-                            className="w-12 h-12 rounded-full border object-cover"
-                        />
+                        <img src={data.userImg} alt="avatar" className="w-12 h-12 rounded-full border object-cover" />
                     ) : (
-                        <FaUserCircle className="w-12 h-12 border shadow-sm rounded-full" />
-
+                        <FaUserCircle className="w-12 h-12 border rounded-full" />
                     )}
-                    <div className=" flex items-center justify-between w-full pr-3">
+                    <div className="flex items-center justify-between w-full pr-3">
                         <div>
                             <Link to={`/userDetail/${data.userId}`}>
-                                <h4 className="font-semibold cursor-pointer hover:text-amber-700 text-lg">{data.userName}</h4>
+                                <h4 className="font-semibold hover:text-amber-700 text-lg">{data.userName}</h4>
                             </Link>
                             <p className="text-sm text-gray-500">{data.createdDate}</p>
                         </div>
                         {!data.isMine && (
-                            <button
-                                onClick={() => setShowReportModal(true)}
-                                className="text-sm cursor-pointer text-red-600 hover:text-red-800"
-                            >
+                            <button onClick={() => setShowReportModal(true)} className="text-red-600 hover:text-red-800">
                                 <MdWarning size={18} />
-
                             </button>
                         )}
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2.5 justify-between px-2">
+                <div className="flex justify-between items-center px-2">
                     <h2 className="text-2xl font-serif">{data.title}</h2>
                     <div className="flex items-center gap-2">
                         <p>{likeCount}</p>
-                        <AiFillLike
-                            onClick={() => likePost(data.id)}
-                            className={`${isLiked ? "text-red-600" : "text-gray-500"} hover:text-red-700 cursor-pointer text-[25px]`}
-                        />
+                        <AiFillLike onClick={() => likePost(data.id)} className={`${isLiked ? "text-red-600" : "text-gray-500"} hover:text-red-700 cursor-pointer text-xl`} />
                     </div>
                 </div>
 
                 {data.mediaUrl && (
-                    <div className="w-full overflow-hidden rounded-lg shadow-md">
+                    <div className="overflow-hidden rounded-lg shadow-md">
                         {data.isVideo ? (
                             <video controls className="w-full max-h-[500px] shadow-2xl" src={data.mediaUrl} />
                         ) : (
@@ -342,33 +274,35 @@ const PostDetail = () => {
                     </div>
                 )}
 
-                <p className="text-black px-1 font-sans leading-relaxed break-words whitespace-pre-wrap">
+                <p className="text-black px-1 font-sans whitespace-pre-wrap leading-relaxed">
                     {formatDescription(data.desc)}
                 </p>
             </div>
 
-            <div className="w-full lg:w-[400px] bg-blue-50 p-4 rounded-lg shadow-xl h-fit lg:sticky lg:top-24">
-                <div className="flex items-center justify-between border-b pb-2 mb-2">
+            {/* Comments */}
+            <div className="w-full lg:w-[400px] bg-blue-50 p-4 rounded-lg shadow-xl lg:sticky lg:top-24">
+                <div className="flex justify-between border-b pb-2 mb-2">
                     <h3 className="text-lg font-semibold text-blue-600">Comments</h3>
-                    <span className="text-black font-semibold">({comments.length})</span>
+                    <span className="font-semibold">({comments.length})</span>
                 </div>
 
                 <div ref={commentScroll} className="space-y-4 md:h-[280px] lg:h-[380px] max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-                    {comments.length > 0 ? (
-                        comments.map((comment) => (
-
-                            <div id={`comment-${comment.id}`} key={comment.id}>
-                                <Comment
-                                    comment={comment}
-                                    commentDelete={handleDelete}
-                                    handleEdit={handleEdit}
-                                    chagedHidden={toggleVisibility}
-
-                                />
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-gray-500 flex items-center text-sm italic">No comments yet.</p>
+                    {comments.length > 0 ? comments.map(comment => (
+                        <div id={`comment-${comment.id}`} key={comment.id}>
+                            <Comment
+                                comment={{ ...comment, isMine: comment.userId === getUserIdFromToken() }}
+                                commentDelete={() => setComments(prev => prev.filter(c => c.id !== comment.id))}
+                                handleEdit={(id, text) => {
+                                    setCommentId(id);
+                                    setNewText(text);
+                                    setIsUpdate(true);
+                                }}
+                                changedHidden={toggleVisibility}
+                                postOwnerId={data.userId}
+                            />
+                        </div>
+                    )) : (
+                        <p className="text-gray-500 text-sm italic">No comments yet.</p>
                     )}
                 </div>
 
@@ -382,39 +316,24 @@ const PostDetail = () => {
                     />
                     {isUpdate ? (
                         <div className="flex flex-col gap-1">
-                            <button
-                                onClick={editComment}
-                                className="w-full py-2 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                            >
-                                Edit
-                            </button>
-                            <button
-                                onClick={cancelUpdate}
-                                className="w-full py-2 cursor-pointer bg-red-500 text-white rounded hover:bg-red-600 transition"
-                            >
-                                Cancel
-                            </button>
+                            <button onClick={editComment} className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Edit</button>
+                            <button onClick={() => { setIsUpdate(false); setNewText(""); }} className="w-full py-2 bg-red-500 text-white rounded hover:bg-red-600">Cancel</button>
                         </div>
                     ) : (
-                        <button
-                            onClick={addComment}
-                            className="w-full py-2 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                        >
-                            Add
-                        </button>
+                        <button onClick={addComment} className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add</button>
                     )}
                 </div>
             </div>
+
             <ReportModal
                 isOpen={showReportModal}
                 onClose={() => setShowReportModal(false)}
                 onSubmit={submitReport}
                 loading={reportLoading}
-                type={"post"}
+                type="post"
             />
         </div>
     );
-
 };
 
 export default PostDetail;

@@ -1,16 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { connection } from '../Notification/SignalR';
 
 const SignalRListener = () => {
     const navigate = useNavigate();
-    const [replace, setReplace] = useState(1);
+
     useEffect(() => {
-        // connection.stop();
-        // connection
-        //     .start()
-        //     .then(() => console.log("SignalR connected"))
+        async function startConnection() {
+            try {
+                if (connection.state !== "Connected") {
+                    await connection.start();
+                    console.log("SignalR connected");
+                }
+            } catch (err) {
+                console.error("SignalR connection error:", err);
+            }
+        }
+
+        startConnection();
 
         connection.on("BannedOrUnBanned", (message) => {
             if (message.isBanned) {
@@ -32,17 +40,14 @@ const SignalRListener = () => {
 
                 setTimeout(() => {
                     navigate("/login");
-                }, 5000)
-
+                }, 5000);
             }
         });
-        setReplace(3);
-
 
         return () => {
             connection.off("BannedOrUnBanned");
         };
-    }, [replace]);
+    }, [navigate]);
 
     return null;
 };
