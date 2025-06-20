@@ -7,9 +7,10 @@ const SignalRListener = () => {
     const navigate = useNavigate();
     const [replace, setReplace] = useState(1);
     useEffect(() => {
-        connection
-            .start()
-            .then(() => console.log("SignalR connected"))
+        // connection.stop();
+        // connection
+        //     .start()
+        //     .then(() => console.log("SignalR connected"))
 
         connection.on("BannedOrUnBanned", (message) => {
             if (message.isBanned) {

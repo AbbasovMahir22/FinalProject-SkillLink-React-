@@ -92,6 +92,7 @@ const PostDetail = () => {
         connection.start()
             .then(() => {
                 connection.invoke("AddToGroup", id);
+                console.log(connection);
 
                 connection.on("ReceiveComment", (newComment) => {
                     const myUserId = getUserIdFromToken();

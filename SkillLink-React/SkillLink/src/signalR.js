@@ -1,4 +1,3 @@
-// SignalR.js
 import { HubConnectionBuilder } from "@microsoft/signalr";
 
 let connection = null;
@@ -15,8 +14,8 @@ export const startConnection = (token, onNotificationReceived) => {
 
     connection.on("ReceiveNotification", onNotificationReceived);
 
-    connection.start()
-        .catch(err => console.error("SignalR error:", err));
+    // connection.start()
+    //     .catch(err => console.error("SignalR error:", err));
 };
 
 export const stopConnection = () => {
