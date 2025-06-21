@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-    AiFillLike,
-    AiOutlineEye,
-    AiOutlineEyeInvisible,
-} from "react-icons/ai";
+import {AiFillLike,} from "react-icons/ai";
 import { MdDelete, MdEdit, MdWarning } from "react-icons/md";
 import { FaUserCircle, FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
@@ -164,7 +160,7 @@ const Comment = ({ comment, commentDelete, handleEdit, changedHidden, postOwnerI
                                     comment.isPostOwner && !comment.isMine && (
                                         <button
                                             onClick={() => changedHidden(comment.id)}
-                                            className="text-gray-500 hover:text-red-600 ml-2"
+                                            className="text-gray-500 cursor-pointer hover:text-red-600 ml-2"
                                             title={comment.isHidden ? "Show Comment" : "Hide Comment"}
                                         >
                                             {comment.isHidden ? <FaEyeSlash /> : <FaEye />}

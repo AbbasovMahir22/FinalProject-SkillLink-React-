@@ -231,13 +231,12 @@ const PostDetail = () => {
             {loading && <Loader />}
 
             <div className="flex-1 space-y-6 pr-2">
-                {/* Header */}
                 <div className="flex items-center gap-4 border-b pb-2">
                     <button onClick={() => window.history.back()}>
                         <IoArrowBackOutline className="w-5 h-5 cursor-pointer hover:text-red-700" />
                     </button>
-                    {data.userImg ? (
-                        <img src={data.userImg} alt="avatar" className="w-12 h-12 rounded-full border object-cover" />
+                    {data.userImage ? (
+                        <img src={data.userImage} alt="avatar" className="w-12 h-12 rounded-full border object-cover" />
                     ) : (
                         <FaUserCircle className="w-12 h-12 border rounded-full" />
                     )}
@@ -249,7 +248,7 @@ const PostDetail = () => {
                             <p className="text-sm text-gray-500">{data.createdDate}</p>
                         </div>
                         {!data.isMine && (
-                            <button onClick={() => setShowReportModal(true)} className="text-red-600 hover:text-red-800">
+                            <button onClick={() => setShowReportModal(true)} className="text-red-600 cursor-pointer hover:text-red-800">
                                 <MdWarning size={18} />
                             </button>
                         )}
@@ -279,7 +278,6 @@ const PostDetail = () => {
                 </p>
             </div>
 
-            {/* Comments */}
             <div className="w-full lg:w-[400px] bg-blue-50 p-4 rounded-lg shadow-xl lg:sticky lg:top-24">
                 <div className="flex justify-between border-b pb-2 mb-2">
                     <h3 className="text-lg font-semibold text-blue-600">Comments</h3>
@@ -312,15 +310,15 @@ const PostDetail = () => {
                         placeholder="Add a comment..."
                         value={newText}
                         onChange={(e) => setNewText(e.target.value)}
-                        className="w-full px-3 py-2 border bg-white rounded text-sm mb-2"
+                        className="w-full px-3 py-2 border  bg-white rounded text-sm mb-2"
                     />
                     {isUpdate ? (
                         <div className="flex flex-col gap-1">
-                            <button onClick={editComment} className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Edit</button>
-                            <button onClick={() => { setIsUpdate(false); setNewText(""); }} className="w-full py-2 bg-red-500 text-white rounded hover:bg-red-600">Cancel</button>
+                            <button onClick={editComment} className="w-full py-2 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600">Edit</button>
+                            <button onClick={() => { setIsUpdate(false); setNewText(""); }} className="w-full py-2 cursor-pointer bg-red-500 text-white rounded hover:bg-red-600">Cancel</button>
                         </div>
                     ) : (
-                        <button onClick={addComment} className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add</button>
+                        <button onClick={addComment} className="w-full py-2 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600">Add</button>
                     )}
                 </div>
             </div>
